@@ -115,8 +115,8 @@ func (ce *ConsensusEngine) Mine(b *LedgerBlock) (uint64, []byte) {
 
 	for i := 0; i < numWorkers; i++ {
 		go func(workerID int) {
-			// Each worker gets its own independent SHA3-512 hasher instance to avoid data races
-			hasher := sha3.New512()
+			// Each worker gets its own independent Keccak-256 hasher instance to avoid data races
+			hasher := sha3.NewLegacyKeccak256()
 			
 			// Local chunk offset per worker
 			var localNonce uint64 = uint64(workerID) * 1000000000
