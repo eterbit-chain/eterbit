@@ -29,21 +29,21 @@ var PoWLimit, _ = new(big.Int).SetString("00000fffffffffffffffffffffffffffffffff
 
 // Immutable Network & Macroeconomic Constants (Hardcoded Rules - Cannot be altered arbitrarily)
 const (
-	CoinUnit           uint64 = 100000000              // 8 Decimals precision factor
-	MaxSupply          uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
-	BlockReward        uint64 = 50 * CoinUnit          // Initial Minting Reward: 50 Units per Block
-	HalvingInterval    uint64 = 7850000                // Strict Halving Block Interval
-	DefaultPort        int    = 19333                  // Default P2P Network Port
-	AddressPrefix      string = "etrb"                 // Immutable Wallet Address Prefix
-	GenesisBits        uint32 = 0x1e0ffff0             // Compact difficulty bits representation ala Bitcoin Core
+	CoinUnit            uint64 = 100000000             // 8 Decimals precision factor
+	MaxSupply           uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
+	BlockReward         uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
+	HalvingInterval     uint64 = 7850000               // Strict Halving Block Interval
+	DefaultPort         int    = 19333                 // Default P2P Network Port
+	AddressPrefix       string = "etrb"                // Immutable Wallet Address Prefix
+	GenesisBits         uint32 = 0x1e0ffff0            // Compact difficulty bits representation ala Bitcoin Core
 
 	// Proof-of-Work Target Parameters
-	PowTargetTimespan  int64  = 2 * 24 * 60 * 60 // Difficulty adjustment span (e.g., 2 Days)
-	PowTargetSpacing   int64  = 35               // Target block time spacing in seconds
-	TargetBlockTimeSec int64  = PowTargetSpacing // Backward compatibility alias for target block time
+	PowTargetTimespan   int64  = 2 * 24 * 60 * 60 // Difficulty adjustment span (e.g., 2 Days)
+	PowTargetSpacing    int64  = 35               // Target block time spacing in seconds
+	TargetBlockTimeSec  int64  = PowTargetSpacing // Backward compatibility alias for target block time
 
-	// ExpectedGenesisHash stores the immutable hardcoded hash checkpoint of the Eterbit Genesis block.
-	ExpectedGenesisHash string = "000e409e9ba9cc44032bf91fb345c10817dacc1d9234782d08873cf9b18bb67f803691b65fdc256678b8179fd2939e3c66874e7a5775945df0f42e3652e42c2d"
+	// ExpectedGenesisHash stores the immutable hardcoded hash checkpoint of the Eterbit Genesis block (Keccak-256).
+	ExpectedGenesisHash string = "0000065691b7a49d2c7b1706b2e7b8f4bb0077a62219cb6686aff243f38ceee5"
 )
 
 // CheckpointData represents a hardcoded historical block height and its immutable cryptographic hash checkpoint.
@@ -75,7 +75,7 @@ type ConsensusParameters struct {
 // DefaultConsensus returns the standard operational consensus rules for Eterbit using PoWLimit baseline.
 func DefaultConsensus() *ConsensusParameters {
 	return &ConsensusParameters{
-		DifficultyBits:    1,               // Initial baseline factor multiplier
+		DifficultyBits:    1,                   // Initial baseline factor multiplier
 		GenesisBits:       GenesisBits,   // Compact target bits
 		BlockReward:       BlockReward,
 		MaxSupply:         MaxSupply,
