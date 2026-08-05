@@ -34,7 +34,7 @@ const (
 	BlockReward         uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
 	HalvingInterval     uint64 = 7850000               // Strict Halving Block Interval
 	DefaultPort         int    = 19333                 // Default P2P Network Port
-	AddressPrefix       string = "etrb"                // Immutable Wallet Address Prefix
+	AddressPrefix       string = "etrb"                // Immutable Wallet Address Prefix (Clean without underscore)
 	GenesisBits         uint32 = 0x1e0ffff0            // Compact difficulty bits representation ala Bitcoin Core
 
 	// Proof-of-Work Target Parameters
@@ -43,7 +43,7 @@ const (
 	TargetBlockTimeSec  int64  = PowTargetSpacing // Backward compatibility alias for target block time
 
 	// ExpectedGenesisHash stores the immutable hardcoded hash checkpoint of the Eterbit Genesis block (Keccak-256).
-	ExpectedGenesisHash string = "0000065691b7a49d2c7b1706b2e7b8f4bb0077a62219cb6686aff243f38ceee5"
+	ExpectedGenesisHash string = "00000d7459efbb41ee2c55b66e476983c19f09d21a29023fb1f7ab245b07b580"
 )
 
 // CheckpointData represents a hardcoded historical block height and its immutable cryptographic hash checkpoint.
@@ -75,7 +75,7 @@ type ConsensusParameters struct {
 // DefaultConsensus returns the standard operational consensus rules for Eterbit using PoWLimit baseline.
 func DefaultConsensus() *ConsensusParameters {
 	return &ConsensusParameters{
-		DifficultyBits:    1,                   // Initial baseline factor multiplier
+		DifficultyBits:    1,             // Initial baseline factor multiplier
 		GenesisBits:       GenesisBits,   // Compact target bits
 		BlockReward:       BlockReward,
 		MaxSupply:         MaxSupply,
