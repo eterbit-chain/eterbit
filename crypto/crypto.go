@@ -5,7 +5,7 @@
 // Project: Eterbit / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
+// You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import (
 	"eterbit/crypto/dilithium3"
 	"eterbit/crypto/sha3"
 	"github.com/cloudflare/circl/sign/dilithium/mode3"
+	golangSha3 "golang.org/x/crypto/sha3"
 )
 
 // GenerateKey delegates post-quantum keypair creation to the dilithium3 module.
@@ -31,6 +32,13 @@ func GenerateKey() (*mode3.PublicKey, *mode3.PrivateKey, error) {
 // Hash512 delegates SHA3-512 cryptographic hashing operations to the sha3 module.
 func Hash512(data []byte) []byte {
 	return sha3.Hash512(data)
+}
+
+// Hash256 computes a Keccak-256 cryptographic hash digest matching the Ethereum standard.
+func Hash256(data []byte) []byte {
+	d := golangSha3.NewLegacyKeccak256()
+	d.Write(data)
+	return d.Sum(nil)
 }
 
 // PubkeyToAddress derives a custom post-quantum network address string from a Dilithium public key bytes slice.
