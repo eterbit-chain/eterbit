@@ -46,7 +46,7 @@ func GetDataDir() string {
 
 // SaveMempoolToDisk serializes the active transaction queue and persists it to external disk storage.
 func SaveMempoolToDisk(mempool []*core.Transfer) {
-	data, _ := json.MarshalIndent(mempool, "", "  ")
+	data, _ := json.MarshalIndent(mempool, "", "   ")
 	os.WriteFile(filepath.Join(GetDataDir(), "mempool.json"), data, 0644)
 }
 
@@ -107,7 +107,7 @@ func HandleCheckSupply() {
 	circulatingSupply := totalBlocks * rewardPerBlock
 
 	fmt.Println("================================================================================")
-	fmt.Println("                       ETERBIT COIN SUPPLY STATISTICS                           ")
+	fmt.Println("                     ETERBIT COIN SUPPLY STATISTICS                             ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Max Supply         : %.8f Coins\n", node.ToDecimal(maxSupply))
 	fmt.Printf(" Circulating Supply : %.8f Coins\n", node.ToDecimal(circulatingSupply))
@@ -128,7 +128,7 @@ func HandleSendTx(recipient string, amount uint64, fee uint64, senderAddr string
 	}
 
 	params := consensus.DefaultConsensus()
-	requiredPrefix := params.AddressPrefix + "_"
+	requiredPrefix := params.AddressPrefix
 	if len(recipient) < len(requiredPrefix) || recipient[:len(requiredPrefix)] != requiredPrefix {
 		fmt.Printf("[CLI REJECTION] Invalid recipient address prefix: '%s'. Network strictly requires '%s'\n", recipient, requiredPrefix)
 		return
@@ -293,7 +293,7 @@ func HandleCheckFees() {
 
 	count, highest, avg := ledger.GetMempoolFeeStats()
 	fmt.Println("================================================================================")
-	fmt.Println("                         ETERBIT MEMPOOL FEE MARKET                             ")
+	fmt.Println("                        ETERBIT MEMPOOL FEE MARKET                              ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Pending Transactions in Mempool : %d\n", count)
 	fmt.Printf(" Highest Priority Fee          : %.8f Coins\n", node.ToDecimal(highest))
@@ -314,7 +314,7 @@ func HandleCheckUptime() {
 // HandleGetNetTotals retrieves and displays network traffic statistics.
 func HandleGetNetTotals() {
 	totals := internal.GetNetTotals()
-	out, _ := json.MarshalIndent(totals, "", "  ")
+	out, _ := json.MarshalIndent(totals, "", "   ")
 	fmt.Println(string(out))
 }
 
@@ -353,12 +353,12 @@ func HandleGetBlock(targetHash string) {
 		return
 	}
 
-	jsonData, err := json.MarshalIndent(foundBlock, "", "  ")
+	jsonData, err := json.MarshalIndent(foundBlock, "", "   ")
 	if err != nil {
 		return
 	}
 	fmt.Println("================================================================")
-	fmt.Println("                  ETERBIT BLOCK JSON DATA                       ")
+	fmt.Println("                 ETERBIT BLOCK JSON DATA                        ")
 	fmt.Println("================================================================")
 	fmt.Println(string(jsonData))
 	fmt.Println("================================================================")
