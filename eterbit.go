@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 
 	"eterbit/internal/cli"
 	"eterbit/internal/daemon"
@@ -50,7 +51,7 @@ func main() {
 	walletLabel := walletCreateCmd.String("label", "Default Account", "Label description for the new multi-wallet account")
 
 	sendRecipient := sendCmd.String("to", "", "Recipient destination address")
-	sendAmount := sendCmd.Float64("amount", 0, "Transfer value amount in coins")
+	sendAmountStr := sendCmd.String("amount", "0", "Transfer value amount in coins (supports small decimals or large numbers)")
 	sendFee := sendCmd.Uint64("fee", 2, "Transaction fee")
 	sendSenderAddr := sendCmd.String("from", "", "Specific sender account address within wallet.dat")
 
@@ -85,8 +86,15 @@ func main() {
 	case "send":
 		// Parse transaction transfer parameters and invoke the modular CLI transaction dispatch handler.
 		sendCmd.Parse(os.Args[2:])
-		// Konversi koin desimal ke satuan unit dasar (1 koin = 100,000,000 unit)
-		amountInUnits := uint64(*sendAmount * 100000000)
+		
+		// Parse amount safely using string parsing to support extremely small decimal fractions or massive numeric quantities without floating-point precision loss
+		var amountInUnits uint64
+		if val, err := strconv.ParseFloat(*sendAmountStr, 64); err == nil {
+			amountInUnits = uint64(val * 100000000)
+		} else {
+			amountInUnits = 0
+		}
+
 		cli.HandleSendTx(*sendRecipient, amountInUnits, *sendFee, *sendSenderAddr)
 	case "node":
 		// Parse node server flag parameters and bootstrap the background P2P validator daemon service.
