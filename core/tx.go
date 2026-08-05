@@ -5,7 +5,7 @@
 // Project: Eterbit / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
+// You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import (
 
 	"eterbit/crypto"
 	"github.com/cloudflare/circl/sign/dilithium/mode3"
+	"golang.org/x/crypto/sha3"
 )
 
 // Transfer represents a state-transition transaction payload containing sender public key, recipient address, transfer values, nonce, and post-quantum signature.
@@ -71,10 +72,12 @@ func (tx *Transfer) Verify() bool {
 	return crypto.Verify(&pub, tx.PayloadBytes(), tx.Signature)
 }
 
-// ComputeID generates a unique cryptographic hash identifier string for the transaction instance using SHA3-512.
+// ComputeID generates a unique cryptographic hash identifier string for the transaction instance using Keccak-256.
 func (tx *Transfer) ComputeID() string {
-	// Hash the combination of the sender public key and payload bytes using SHA3-512 to produce a unique transaction ID.
-	hasher := crypto.Hash512(append(tx.SenderPubKey, tx.PayloadBytes()...))
+	// Hash the combination of the sender public key and payload bytes using Keccak-256 to produce a unique transaction ID.
+	d := sha3.NewLegacyKeccak256()
+	d.Write(append(tx.SenderPubKey, tx.PayloadBytes()...))
+	hash := d.Sum(nil)
 	// Encode the resulting hash digest into a hexadecimal string representation.
-	return hex.EncodeToString(hasher)
+	return hex.EncodeToString(hash)
 }
