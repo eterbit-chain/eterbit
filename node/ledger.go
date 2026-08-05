@@ -30,7 +30,7 @@ import (
 )
 
 // Hardcoded Genesis Hash checkpoint linked directly to the immutable consensus specifications.
-const HardcodedGenesisHash = "000e409e9ba9cc44032bf91fb345c10817dacc1d9234782d08873cf9b18bb67f803691b65fdc256678b8179fd2939e3c66874e7a5775945df0f42e3652e42c2d"
+const HardcodedGenesisHash = "00000d7459efbb41ee2c55b66e476983c19f09d21a29023fb1f7ab245b07b580"
 
 // AccountState represents the account balance and transaction sequence nonce.
 type AccountState struct {
