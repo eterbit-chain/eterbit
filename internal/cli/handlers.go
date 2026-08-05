@@ -82,7 +82,7 @@ func HandleCreateWalletAccount(label string) {
 
 // HandleCheckBalance queries the state database to display all registered account balances and nonces.
 func HandleCheckBalance() {
-	ledger := node.InitializeLedger(GetDataDir(), 3, "SYSTEM_VIEWER")
+	ledger := node.InitializeLedger(GetDataDir(), 1, "SYSTEM_VIEWER")
 	fmt.Println("================================================================================")
 	fmt.Println(" REGISTERED ACCOUNT BALANCES IN LEVELDB")
 	fmt.Println("================================================================================")
@@ -98,20 +98,16 @@ func HandleCheckBalance() {
 
 // HandleCheckSupply queries the blockchain ledger and displays maximum supply and circulating minted coins.
 func HandleCheckSupply() {
-	// Define the fixed maximum coin supply limit updated to 785 million coins (raw uint64 with 8 decimals)
 	const maxSupply uint64 = 785000000 * 100000000
-	const rewardPerBlock uint64 = 5000000000 // 50 coins per block with 8 decimals precision
+	const rewardPerBlock uint64 = 5000000000
 
-	// Initialize the ledger instance to inspect total minted blocks
-	ledger := node.InitializeLedger(GetDataDir(), 3, "SYSTEM_VIEWER")
+	ledger := node.InitializeLedger(GetDataDir(), 1, "SYSTEM_VIEWER")
 	
-	// Calculate circulating supply based on total mined blocks
 	totalBlocks := uint64(len(ledger.Chain))
 	circulatingSupply := totalBlocks * rewardPerBlock
 
-	// Render the supply metrics report to standard output
 	fmt.Println("================================================================================")
-	fmt.Println("                     ETERBIT COIN SUPPLY STATISTICS                             ")
+	fmt.Println("                       ETERBIT COIN SUPPLY STATISTICS                           ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Max Supply         : %.8f Coins\n", node.ToDecimal(maxSupply))
 	fmt.Printf(" Circulating Supply : %.8f Coins\n", node.ToDecimal(circulatingSupply))
@@ -131,14 +127,12 @@ func HandleSendTx(recipient string, amount uint64, fee uint64, senderAddr string
 		return
 	}
 
-	// --- STRICT ADDRESS PREFIX VALIDATION ---
 	params := consensus.DefaultConsensus()
 	requiredPrefix := params.AddressPrefix + "_"
 	if len(recipient) < len(requiredPrefix) || recipient[:len(requiredPrefix)] != requiredPrefix {
 		fmt.Printf("[CLI REJECTION] Invalid recipient address prefix: '%s'. Network strictly requires '%s'\n", recipient, requiredPrefix)
 		return
 	}
-	// ----------------------------------------
 
 	dataDir := GetDataDir()
 	filePath := filepath.Join(dataDir, "wallet.dat")
@@ -170,7 +164,7 @@ func HandleSendTx(recipient string, amount uint64, fee uint64, senderAddr string
 		return
 	}
 
-	ledger := node.InitializeLedger(dataDir, 3, selectedAccount.Address)
+	ledger := node.InitializeLedger(dataDir, 1, selectedAccount.Address)
 	ledger.State[selectedAccount.Address] = &node.AccountState{Balance: node.InitialAirdrop, Nonce: 0}
 	
 	currentNonce := ledger.State[selectedAccount.Address].Nonce + uint64(time.Now().UnixNano()%100000)
@@ -230,7 +224,7 @@ func HandleManualMine(blocksCount int, targetAddress string) {
 
 	fmt.Printf("[CLI] Triggering Manual Block Mining (Target Address: %s)...\n", targetAddress)
 	dataDir := GetDataDir()
-	ledger := node.InitializeLedger(dataDir, 3, targetAddress)
+	ledger := node.InitializeLedger(dataDir, 1, targetAddress)
 	
 	diskMempool := LoadMempoolFromDisk()
 	if len(diskMempool) > 0 {
@@ -289,7 +283,7 @@ func HandleCheckFees() {
 		addrMiner = wf.Accounts[0].Address
 	}
 
-	ledger := node.InitializeLedger(GetDataDir(), 3, addrMiner)
+	ledger := node.InitializeLedger(GetDataDir(), 1, addrMiner)
 	diskMempool := LoadMempoolFromDisk()
 	if len(diskMempool) > 0 {
 		ledger.Mu.Lock()
@@ -333,7 +327,7 @@ func HandleGetBlockHash(indexStr string) {
 		return
 	}
 
-	ledger := node.InitializeLedger(GetDataDir(), 3, "SYSTEM_VIEWER")
+	ledger := node.InitializeLedger(GetDataDir(), 1, "SYSTEM_VIEWER")
 	if int(index) >= len(ledger.Chain) {
 		fmt.Printf("[CLI] Block index #%d out of range (Total: %d)\n", index, len(ledger.Chain))
 		return
@@ -345,7 +339,7 @@ func HandleGetBlockHash(indexStr string) {
 
 // HandleGetBlock retrieves and renders complete structural block data in JSON format based on a target hash.
 func HandleGetBlock(targetHash string) {
-	ledger := node.InitializeLedger(GetDataDir(), 3, "SYSTEM_VIEWER")
+	ledger := node.InitializeLedger(GetDataDir(), 1, "SYSTEM_VIEWER")
 	var foundBlock *core.LedgerBlock = nil
 	for _, block := range ledger.Chain {
 		if hex.EncodeToString(block.Hash) == targetHash {
