@@ -149,14 +149,15 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 		currentConsensusReward := consensus.BlockReward
 		currentMaxSupply := consensus.MaxSupply
 		currentHalvingInterval := consensus.HalvingInterval
+		currentDefaultPort := consensus.DefaultPort
 
-		// Dynamic Sovereign Hard Fork Guard: Enforce strict macro-economic and halving interval consensus validation.
-		// If genesis parameters, reward, max supply, or halving interval policies are altered in source code, instantly wipe storage and trigger a sovereign hard fork.
-		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits || storedGenesis.Reward != currentConsensusReward || storedGenesis.MaxSupply != currentMaxSupply || storedGenesis.HalvingInterval != currentHalvingInterval {
+		// Dynamic Sovereign Hard Fork Guard: Enforce strict macro-economic, halving interval, and network port consensus validation.
+		// If genesis parameters, reward, max supply, halving interval, or default port policies are altered in source code, instantly wipe storage and trigger a sovereign hard fork.
+		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits || storedGenesis.Reward != currentConsensusReward || storedGenesis.MaxSupply != currentMaxSupply || storedGenesis.HalvingInterval != currentHalvingInterval || storedGenesis.DefaultPort != currentDefaultPort {
 			fmt.Println("\n================================================================================")
-			fmt.Println("[CONSENSUS EVENT] Genesis parameters or macroeconomic policies modified in code! Triggering Sovereign Hard Fork...")
-			fmt.Printf("OLD GENESIS -> Message: '%s' | Reward: %.8f | MaxSupply: %.8f | HalvingInterval: %d | Timestamp: %d | Bits: %d\n", storedGenesis.Message, formatCoin(storedGenesis.Reward), formatCoin(storedGenesis.MaxSupply), storedGenesis.HalvingInterval, storedGenesis.Timestamp, storedGenesis.Bits)
-			fmt.Printf("NEW GENESIS -> Message: '%s' | Reward: %.8f | MaxSupply: %.8f | HalvingInterval: %d | Timestamp: %d | Bits: %d\n", pszTimestamp, formatCoin(currentConsensusReward), formatCoin(currentMaxSupply), currentHalvingInterval, genesisTimestamp, genesisBits)
+			fmt.Println("[CONSENSUS EVENT] Genesis parameters, network port, or macroeconomic policies modified in code! Triggering Sovereign Hard Fork...")
+			fmt.Printf("OLD GENESIS -> Port: %d | Message: '%s' | Reward: %.8f | MaxSupply: %.8f | HalvingInterval: %d | Timestamp: %d | Bits: %d\n", storedGenesis.DefaultPort, storedGenesis.Message, formatCoin(storedGenesis.Reward), formatCoin(storedGenesis.MaxSupply), storedGenesis.HalvingInterval, storedGenesis.Timestamp, storedGenesis.Bits)
+			fmt.Printf("NEW GENESIS -> Port: %d | Message: '%s' | Reward: %.8f | MaxSupply: %.8f | HalvingInterval: %d | Timestamp: %d | Bits: %d\n", currentDefaultPort, pszTimestamp, formatCoin(currentConsensusReward), formatCoin(currentMaxSupply), currentHalvingInterval, genesisTimestamp, genesisBits)
 			fmt.Println("[CONSENSUS EVENT] Automatically wiping storage and re-mining genesis block...")
 			fmt.Println("================================================================================")
 
@@ -228,6 +229,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 		Reward:          exactReward,
 		MaxSupply:       consensus.MaxSupply,
 		HalvingInterval: consensus.HalvingInterval,
+		DefaultPort:     consensus.DefaultPort,
 		Message:         pszTimestamp,
 	}
 
@@ -240,7 +242,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 	lc.Storage.SaveBlock(0, genesis)
 	
 	fmt.Printf("[GENESIS] Block 0 Loaded/Spawned with message: '%s'\n", pszTimestamp)
-	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d | MaxSupply: %.8f | HalvingInterval: %d | Hash: %x\n", genesisTimestamp, genesis.Nonce, genesis.Bits, formatCoin(genesis.MaxSupply), genesis.HalvingInterval, genesis.Hash)
+	fmt.Printf("[GENESIS PARAMS] Port: %d | Timestamp: %d | Nonce: %d | Bits: %d | MaxSupply: %.8f | HalvingInterval: %d | Hash: %x\n", consensus.DefaultPort, genesisTimestamp, genesis.Nonce, genesis.Bits, formatCoin(genesis.MaxSupply), genesis.HalvingInterval, genesis.Hash)
 }
 
 // AddToMempool validates and inserts a transaction payload into the pending mempool queue with Fee Market priority sorting.
@@ -405,6 +407,7 @@ func (lc *LedgerCore) MineBlock() {
 		Reward:          exactReward,
 		MaxSupply:       consensus.MaxSupply,
 		HalvingInterval: consensus.HalvingInterval,
+		DefaultPort:     consensus.DefaultPort,
 	}
 
 	fmt.Printf("[MINER] Mining Block #%d with %d transactions (Dynamic Difficulty: %d)...\n", newBlock.Index, len(validTx), newBlock.Difficulty)
