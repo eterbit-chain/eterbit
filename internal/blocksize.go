@@ -16,28 +16,35 @@
 package internal
 
 import (
-    "os"
-    "path/filepath"
+	"os"
+	"path/filepath"
 )
 
 // GetBlockChainStorageSize calculates the total physical storage size of the blockchain 
 // database directory recursively in bytes by walking through all files.
 func GetBlockChainStorageSize(dbPath string) (int64, error) {
-    var totalSize int64 = 0
+	// Initialize a variable to accumulate the total size in bytes.
+	var totalSize int64 = 0
 
-    err := filepath.Walk(dbPath, func(path string, info os.FileInfo, err error) error {
-        if err != nil {
-            return err
-        }
-        if !info.IsDir() {
-            totalSize += info.Size()
-        }
-        return nil
-    })
+	// Walk recursively through the database directory path to inspect all underlying files.
+	err := filepath.Walk(dbPath, func(path string, info os.FileInfo, err error) error {
+		// Ignore individual file access errors to ensure traversal continues smoothly.
+		if err != nil {
+			return nil
+		}
+		
+		// Accumulate file sizes if the current path points to a valid regular file.
+		if info != nil && !info.IsDir() {
+			totalSize += info.Size()
+		}
+		return nil
+	})
 
-    if err != nil {
-        return 0, err
-    }
+	// Return zero size and the encountered error if the directory walk fails completely.
+	if err != nil {
+		return 0, err
+	}
 
-    return totalSize, nil
+	// Return the final aggregated storage size in bytes.
+	return totalSize, nil
 }
