@@ -378,11 +378,13 @@ func (lc *LedgerCore) MineBlock() {
 			}
 			acc := lc.State[sender]
 
-			if acc.Balance >= (tx.Value + tx.Fee) {
-				acc.Balance -= (tx.Value + tx.Fee)
-			} else {
-				acc.Balance = 0
+			totalCost := tx.Value + tx.Fee
+			if acc.Balance < totalCost {
+				fmt.Printf("[MINER REJECTION] Insufficient balance for sender %s (Has: %.8f, Needed: %.8f)\n", sender, formatCoin(acc.Balance), formatCoin(totalCost))
+				continue
 			}
+
+			acc.Balance -= totalCost
 			acc.Nonce++
 
 			if _, ok := lc.State[tx.Recipient]; !ok {
