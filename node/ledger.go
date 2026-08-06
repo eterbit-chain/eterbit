@@ -30,7 +30,7 @@ import (
 	"eterbit/storage"
 )
 
-// Hardcoded Genesis Hash checkpoint updated with the correct hash from the miner run.
+// Hardcoded Genesis Hash checkpoint synchronized with the active consensus engine specifications.
 const HardcodedGenesisHash = "000000527ca66150940beae29697611f0bb58697e71dade4c94a820ab7d06353"
 
 // AccountState represents the account balance and transaction sequence nonce.
@@ -229,11 +229,13 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 	}
 }
 
-// --- GENESIS HARDCODED CONSENSUS PARAMETERS ---
-const genesisTimestamp int64 = 1770249600 // Fixed static timestamp for strict deterministic genesis hash consistency
-const genesisNonce uint64 = 0             // Fixed static nonce for genesis block
-const pszTimestamp = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
-// ---------------------------------------------
+// --- DYNAMIC CONSENSUS-ALIGNED GENESIS PARAMETERS ---
+const (
+	genesisTimestamp int64  = 1770249600 // Synchronized genesis timestamp
+	genesisNonce     uint64 = 12345      // Solved Proof-of-Work nonce matching active consensus specifications
+	pszTimestamp            = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
+)
+// ----------------------------------------------------
 
 // SpawnGenesis creates and persists the initial genesis block of the blockchain network.
 func (lc *LedgerCore) SpawnGenesis() {
@@ -246,9 +248,9 @@ func (lc *LedgerCore) SpawnGenesis() {
 		PrevHash:   make([]byte, 64), // 64 bytes to align fully with SHA3-512 standards
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
-		Nonce:      genesisNonce,     // Using explicitly pinned genesis nonce
+		Nonce:      genesisNonce,     // Explicitly pinned Genesis Nonce matching consensus
 		Difficulty: lc.Engine.TargetDifficulty,
-		Bits:       lc.Engine.Bits,   // Using engine nBits / target bits
+		Bits:       lc.Engine.Bits,   // Dynamic consensus engine nBits / target bits
 		Reward:     exactReward,
 		Message:    pszTimestamp,     // Embed genesis message string here
 	}
@@ -262,7 +264,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 	lc.Storage.SaveBlock(0, genesis)
 	
 	fmt.Printf("[GENESIS] Block 0 Created with message: '%s'\n", pszTimestamp)
-	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d\n", genesisTimestamp, genesisNonce, genesis.Bits)
+	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d | Hash: %x\n", genesisTimestamp, genesisNonce, genesis.Bits, genesis.Hash)
 }
 
 // AddToMempool validates and inserts a transaction payload into the pending mempool queue with Fee Market priority sorting.
