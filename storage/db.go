@@ -85,3 +85,23 @@ func (d *Database) GetBlock(index uint64) ([]byte, error) {
 	// Retrieve and return the raw stored block bytes from the LevelDB database instance.
 	return d.DB.Get([]byte(key), nil)
 }
+
+// ClearAll iterates through all keys stored in the database, batches them, and deletes them completely for hard fork resets.
+func (d *Database) ClearAll() error {
+	// Create an iterator to scan all keys present in the LevelDB instance.
+	iter := d.DB.NewIterator(nil, nil)
+	defer iter.Release()
+
+	// Initialize a LevelDB write batch container for atomic deletion operations.
+	batch := new(leveldb.Batch)
+	for iter.Next() {
+		batch.Delete(iter.Key())
+	}
+
+	if err := iter.Error(); err != nil {
+		return err
+	}
+
+	// Execute the batch write operation to wipe out all existing keys and values from disk.
+	return d.DB.Write(batch, nil)
+}
