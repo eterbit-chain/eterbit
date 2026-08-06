@@ -79,8 +79,8 @@ func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byt
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
-		[]byte(strconv.FormatUint(b.Reward, 16)), // Include reward to ensure macro-economic hard fork sensitivity
-		[]byte(strconv.FormatUint(b.Difficulty, 16)),
+		[]byte(strconv.FormatUint(b.Reward, 16)),             // Include reward to ensure macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)), // Fixed: cast uint32 to uint64
 		[]byte(strconv.FormatUint(nonce, 16)),
 		[]byte(b.Message), // Include message in PoW hashing calculation
 	}, []byte{})
