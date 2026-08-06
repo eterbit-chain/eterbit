@@ -29,6 +29,12 @@ import (
 	"eterbit/storage"
 )
 
+const (
+	genesisTimestamp int64  = 1770249600
+	genesisBits      uint32 = 504365040
+	pszTimestamp            = "anjayyy"
+)
+
 // AccountState represents the account balance and transaction sequence nonce.
 type AccountState struct {
 	Balance uint64 `json:"balance"`
@@ -141,13 +147,6 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 	if len(lc.Chain) > 0 {
 		storedGenesis := lc.Chain[0]
 
-		// Dynamic Consensus Check constants matching SpawnGenesis
-		const (
-			genesisTimestamp int64  = 1770249600
-			genesisBits      uint32 = 504365040
-			pszTimestamp            = "anjayyy"
-		)
-
 		// Dynamic Consensus Integrity Check: If genesis parameters change in code, auto-mine a brand new genesis and reset storage seamlessly!
 		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits {
 			fmt.Println("\n================================================================================")
@@ -210,12 +209,6 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 
 // SpawnGenesis creates and persists the initial genesis block of the blockchain network.
 func (lc *LedgerCore) SpawnGenesis() {
-	const (
-		genesisTimestamp int64  = 1770249600
-		genesisBits      uint32 = 504365040
-		pszTimestamp            = "anjayyy"
-	)
-
 	exactReward := CalculateBlockReward(0)
 
 	genesis := &core.LedgerBlock{
