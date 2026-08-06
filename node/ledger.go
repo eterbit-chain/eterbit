@@ -234,12 +234,13 @@ func (lc *LedgerCore) SpawnGenesis() {
 	// Compute the base block reward allocation specifically designated for block index zero.
 	exactReward := CalculateBlockReward(0)
 	
-	// --- GENESIS TIMESTAMP MESSAGE ---
+	// --- GENESIS TIMESTAMP MESSAGE & FIXED PARAMS ---
 	pszTimestamp := "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
+	const fixedGenesisTimestamp int64 = 1770249600 // Fixed static timestamp for strict deterministic genesis hash consistency
 
 	genesis := &core.LedgerBlock{
 		Index:      0,
-		Timestamp:  time.Now().Unix(),
+		Timestamp:  fixedGenesisTimestamp,
 		PrevHash:   make([]byte, 64), // 64 bytes to align fully with SHA3-512 standards
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
