@@ -45,6 +45,7 @@ type LedgerBlock struct {
 	Reward          uint64      `json:"reward"`
 	MaxSupply       uint64      `json:"max_supply"`       // Bound directly to enable true cryptographic sovereign hard fork sensitivity
 	HalvingInterval uint64      `json:"halving_interval"` // Bound directly to alter PoW fingerprint on halving policy change
+	DefaultPort     int         `json:"default_port"`     // Bound directly to alter PoW fingerprint on network default port change
 	Message         string      `json:"message,omitempty"` // Added pszTimestamp equivalent field
 }
 
@@ -68,7 +69,7 @@ func NewConsensusEngine(difficulty uint32) *ConsensusEngine {
 	}
 }
 
-// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, max supply, halving interval, candidate nonce, and genesis message into a unified byte array for hashing.
+// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, max supply, halving interval, default port, candidate nonce, and genesis message into a unified byte array for hashing.
 func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byte {
 	var rawTxData []byte
 	// Concatenate all transfer signatures included in the block payload.
@@ -88,15 +89,22 @@ func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byt
 		blockHalvingInterval = consensus.HalvingInterval
 	}
 
-	// Join all block components including Reward, MaxSupply, HalvingInterval, and Message into a single canonical byte array representation.
+	// Fallback to active consensus DefaultPort if block struct field is uninitialized
+	blockDefaultPort := b.DefaultPort
+	if blockDefaultPort == 0 {
+		blockDefaultPort = consensus.DefaultPort
+	}
+
+	// Join all block components including Reward, MaxSupply, HalvingInterval, DefaultPort, and Message into a single canonical byte array representation.
 	return bytes.Join([][]byte{
 		b.PrevHash,
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
 		[]byte(strconv.FormatUint(b.Reward, 16)),               // Include reward for macro-economic hard fork sensitivity
-		[]byte(strconv.FormatUint(blockMaxSupply, 16)),        // Include block-bound max supply for true sovereign hard fork sensitivity
-		[]byte(strconv.FormatUint(blockHalvingInterval, 16)),  // Include halving interval to trigger hash fingerprint changes on modification
+		[]byte(strconv.FormatUint(blockMaxSupply, 16)),         // Include block-bound max supply for true sovereign hard fork sensitivity
+		[]byte(strconv.FormatUint(blockHalvingInterval, 16)),   // Include halving interval to trigger hash fingerprint changes on modification
+		[]byte(strconv.Itoa(blockDefaultPort)),                 // Include network default port to bind network topology to genesis cryptographic fingerprint
 		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)),
 		[]byte(strconv.FormatUint(nonce, 16)),
 		[]byte(b.Message), // Include message in PoW hashing calculation
@@ -119,6 +127,11 @@ func (ce *ConsensusEngine) Mine(b *LedgerBlock) (uint64, []byte) {
 	// Ensure block HalvingInterval reflects active consensus rule if uninitialized
 	if b.HalvingInterval == 0 {
 		b.HalvingInterval = consensus.HalvingInterval
+	}
+
+	// Ensure block DefaultPort reflects active consensus rule if uninitialized
+	if b.DefaultPort == 0 {
+		b.DefaultPort = consensus.DefaultPort
 	}
 
 	// Ensure the block carries the proper bits configuration
