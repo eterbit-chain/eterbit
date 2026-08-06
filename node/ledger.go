@@ -146,19 +146,22 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 
 	if len(lc.Chain) > 0 {
 		storedGenesis := lc.Chain[0]
+		currentConsensusReward := consensus.BlockReward
 
-		// Dynamic Consensus Integrity Check: If genesis parameters change in code, auto-mine a brand new genesis and reset storage seamlessly!
-		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits {
+		// Dynamic Sovereign Hard Fork Guard: Enforce strict macro-economic consensus validation.
+		// If genesis parameters or reward policies are altered in source code, instantly wipe storage and trigger a sovereign hard fork.
+		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits || storedGenesis.Reward != currentConsensusReward {
 			fmt.Println("\n================================================================================")
-			fmt.Println("[CONSENSUS EVENT] Genesis parameters modified in code! Triggering Sovereign Hard Fork...")
-			fmt.Printf("OLD GENESIS -> Message: '%s' | Timestamp: %d | Bits: %d\n", storedGenesis.Message, storedGenesis.Timestamp, storedGenesis.Bits)
-			fmt.Printf("NEW GENESIS -> Message: '%s' | Timestamp: %d | Bits: %d\n", pszTimestamp, genesisTimestamp, genesisBits)
-			fmt.Println("[CONSENSUS EVENT] Automatically re-mining genesis block and resetting chain state...")
+			fmt.Println("[CONSENSUS EVENT] Genesis parameters or macroeconomic reward modified in code! Triggering Sovereign Hard Fork...")
+			fmt.Printf("OLD GENESIS -> Message: '%s' | Reward: %.8f | Timestamp: %d | Bits: %d\n", storedGenesis.Message, formatCoin(storedGenesis.Reward), storedGenesis.Timestamp, storedGenesis.Bits)
+			fmt.Printf("NEW GENESIS -> Message: '%s' | Reward: %.8f | Timestamp: %d | Bits: %d\n", pszTimestamp, formatCoin(currentConsensusReward), genesisTimestamp, genesisBits)
+			fmt.Println("[CONSENSUS EVENT] Automatically wiping storage and re-mining genesis block...")
 			fmt.Println("================================================================================")
 
 			// Clear stored chain and reset storage database completely
 			lc.Chain = make([]*core.LedgerBlock, 0)
 			lc.State = make(map[string]*AccountState)
+			lc.Storage.ClearAll()
 			
 			// Re-spawn new dynamic genesis block
 			lc.SpawnGenesis()
