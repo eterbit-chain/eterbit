@@ -29,17 +29,18 @@ var PoWLimit, _ = new(big.Int).SetString("00000fffffffffffffffffffffffffffffffff
 
 // Immutable Network & Macroeconomic Constants (Hardcoded Rules)
 const (
-	CoinUnit           uint64 = 100000000             // 8 Decimals precision factor
-	MaxSupply          uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
-	BlockReward        uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
-	HalvingInterval    uint64 = 7850000               // Strict Halving Block Interval
-	DefaultPort        int    = 19333                 // Default P2P Network Port
-	AddressPrefix      string = "etrb"                // Immutable Wallet Address Prefix
-	GenesisBits        uint32 = 0x1e0ffff0            // Compact difficulty bits representation
+	CoinUnit          uint64 = 100000000             // 8 Decimals precision factor
+	MaxSupply         uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
+	BlockReward       uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
+	HalvingInterval   uint64 = 7850000               // Strict Halving Block Interval
+	DefaultPort       int    = 19333                 // Default P2P Network Port
+	AddressPrefix     string = "etrb"                // Immutable Wallet Address Prefix
+	GenesisBits       uint32 = 0x1e0ffff0            // Compact difficulty bits representation
+	MaxBlockSizeBytes uint64 = 4 * 1024 * 1024       // Maximum Block Size Limit (4 MB for Dilithium-3 transactions)
 
 	// Proof-of-Work Target Parameters
 	PowTargetTimespan   int64 = 2 * 24 * 60 * 60  
-	PowTargetSpacing    int64 = 35                 
+	PowTargetSpacing    int64 = 35                   
 	TargetBlockTimeSec  int64 = PowTargetSpacing   
 
 	// ExpectedGenesisHash stores the immutable cryptographic hash checkpoint.
@@ -61,6 +62,7 @@ type ConsensusParameters struct {
 	HalvingInterval   uint64 
 	DefaultPort       int    
 	AddressPrefix     string 
+	MaxBlockSizeBytes uint64 
 	PowTargetTimespan int64  
 	PowTargetSpacing  int64  
 }
@@ -75,6 +77,7 @@ func DefaultConsensus() *ConsensusParameters {
 		HalvingInterval:   HalvingInterval,
 		DefaultPort:       DefaultPort,
 		AddressPrefix:     AddressPrefix,
+		MaxBlockSizeBytes: MaxBlockSizeBytes,
 		PowTargetTimespan: PowTargetTimespan,
 		PowTargetSpacing:  PowTargetSpacing,
 	}
