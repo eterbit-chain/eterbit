@@ -41,7 +41,7 @@ type LedgerBlock struct {
 	Miner      string      `json:"miner"`
 	Nonce      uint64      `json:"nonce"`
 	Difficulty uint32      `json:"difficulty"`
-	Bits       uint32      `json:"bits"`       // Compact target difficulty bits representation (nBits)
+	Bits       uint32      `json:"bits"`        // Compact target difficulty bits representation (nBits)
 	Reward     uint64      `json:"reward"`
 	Message    string      `json:"message,omitempty"` // Added pszTimestamp equivalent field
 }
@@ -66,19 +66,21 @@ func NewConsensusEngine(difficulty uint32) *ConsensusEngine {
 	}
 }
 
-// AssembleBlockData serializes and concatenates block headers, transactional payloads, candidate nonce, and genesis message into a unified byte array for hashing.
+// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, candidate nonce, and genesis message into a unified byte array for hashing.
 func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byte {
 	var rawTxData []byte
 	// Concatenate all transfer signatures included in the block payload.
 	for _, tx := range b.Transfers {
 		rawTxData = append(rawTxData, tx.Signature...)
 	}
-	// Join all block components including the message into a single canonical byte array representation.
+	// Join all block components including Reward and Message into a single canonical byte array representation.
 	return bytes.Join([][]byte{
 		b.PrevHash,
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
+		[]byte(strconv.FormatUint(b.Reward, 16)), // Include reward to ensure macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(b.Difficulty, 16)),
 		[]byte(strconv.FormatUint(nonce, 16)),
 		[]byte(b.Message), // Include message in PoW hashing calculation
 	}, []byte{})
