@@ -41,8 +41,9 @@ type LedgerBlock struct {
 	Miner      string      `json:"miner"`
 	Nonce      uint64      `json:"nonce"`
 	Difficulty uint32      `json:"difficulty"`
-	Bits       uint32      `json:"bits"`        // Compact target difficulty bits representation (nBits)
+	Bits       uint32      `json:"bits"`         // Compact target difficulty bits representation (nBits)
 	Reward     uint64      `json:"reward"`
+	MaxSupply  uint64      `json:"max_supply"`   // Bound directly to enable true cryptographic sovereign hard fork sensitivity
 	Message    string      `json:"message,omitempty"` // Added pszTimestamp equivalent field
 }
 
@@ -73,14 +74,21 @@ func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byt
 	for _, tx := range b.Transfers {
 		rawTxData = append(rawTxData, tx.Signature...)
 	}
+
+	// Fallback to active consensus MaxSupply if block struct field is uninitialized
+	blockMaxSupply := b.MaxSupply
+	if blockMaxSupply == 0 {
+		blockMaxSupply = consensus.MaxSupply
+	}
+
 	// Join all block components including Reward, MaxSupply, and Message into a single canonical byte array representation.
 	return bytes.Join([][]byte{
 		b.PrevHash,
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
-		[]byte(strconv.FormatUint(b.Reward, 16)),             // Include reward for macro-economic hard fork sensitivity
-		[]byte(strconv.FormatUint(consensus.MaxSupply, 16)), // Include max supply for macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(b.Reward, 16)),         // Include reward for macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(blockMaxSupply, 16)),  // Include block-bound max supply for true sovereign hard fork sensitivity
 		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)),
 		[]byte(strconv.FormatUint(nonce, 16)),
 		[]byte(b.Message), // Include message in PoW hashing calculation
@@ -93,6 +101,11 @@ func (ce *ConsensusEngine) Mine(b *LedgerBlock) (uint64, []byte) {
 	// Fall back to standard block reward calculation exclusively if uninitialized outside genesis bounds.
 	if b.Reward == 0 && b.Index > 0 {
 		b.Reward = GetBlockReward(b.Index)
+	}
+
+	// Ensure block MaxSupply reflects active consensus rule if uninitialized
+	if b.MaxSupply == 0 {
+		b.MaxSupply = consensus.MaxSupply
 	}
 
 	// Ensure the block carries the proper bits configuration
