@@ -82,15 +82,21 @@ func (lc *LedgerCore) VerifyConsensusIntegrity() {
 	// Convert raw byte slice hash to hex string format for comparison against the hardcoded checkpoint.
 	genesisHashHex := hex.EncodeToString(genesis.Hash)
 
-	// Strict checkpoint validation: Halt immediately if the database hash drifts from the immutable checkpoint.
-	if HardcodedGenesisHash != "" && genesisHashHex != HardcodedGenesisHash {
-		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] GENESIS TAMPERING / RULE MISMATCH DETECTED!\n"+
-			"The genesis block or its rules have been modified while an existing database is present!\n"+
-			"Expected Checkpoint Hash: %s\n"+
-			"Got Database Hash:        %s\n"+
-			"Node execution halted immediately to preserve network consensus integrity.\n",
-			HardcodedGenesisHash, genesisHashHex))
+	// --- HARD FORK CONSENSUS FINGERPRINT CHECK ---
+	// Strict checkpoint validation: Halt immediately if the database genesis parameters or hash drift from the immutable active code rules.
+	if genesis.Timestamp != genesisTimestamp || genesis.Nonce != genesisNonce || genesis.Bits != genesisBits || (HardcodedGenesisHash != "" && genesisHashHex != HardcodedGenesisHash) {
+		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] HARD FORK / ATURAN TIDAK VALID TERDETEKSI!\n"+
+			"Parameter genesis block di database tidak sinkron dengan aturan konsensus kodingan terbaru!\n"+
+			"--------------------------------------------------------------------------------\n"+
+			"Stored in Database -> Timestamp: %d | Nonce: %d | Bits: %d | Hash: %s\n"+
+			"Current Code Rules -> Timestamp: %d | Nonce: %d | Bits: %d | Checkpoint: %s\n"+
+			"--------------------------------------------------------------------------------\n"+
+			"Node menolak rantai ini demi menjaga kedaulatan konsensus.\n"+
+			"Solusi (Hard Fork Action): Hapus database lama (`rm -rf ~/.eterbit`) untuk memulai era rantai baru!\n",
+			genesis.Timestamp, genesis.Nonce, genesis.Bits, genesisHashHex,
+			genesisTimestamp, genesisNonce, genesisBits, HardcodedGenesisHash))
 	}
+	// ---------------------------------------------
 
 	// Also leverage the centralized consensus verification function for completeness.
 	if err := consensus.VerifyGenesisCheckpoint(genesis.Hash); err != nil {
