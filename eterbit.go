@@ -46,6 +46,7 @@ func main() {
 	uptimeCmd := flag.NewFlagSet("uptime", flag.ExitOnError)
 	getNetTotalsCmd := flag.NewFlagSet("getnettotals", flag.ExitOnError)
 	addNodeCmd := flag.NewFlagSet("addnode", flag.ExitOnError)
+	blockSizeCmd := flag.NewFlagSet("blocksize", flag.ExitOnError)
 
 	// Define specific parameter bindings for individual command flags.
 	walletLabel := walletCreateCmd.String("label", "Default Account", "Label description for the new multi-wallet account")
@@ -140,6 +141,10 @@ func main() {
 		// Parse network traffic flags and invoke the network traffic totals diagnostic handler.
 		getNetTotalsCmd.Parse(os.Args[2:])
 		cli.HandleGetNetTotals()
+	case "blocksize":
+		// Parse blockchain storage size flags and invoke the physical disk usage diagnostic handler.
+		blockSizeCmd.Parse(os.Args[2:])
+		cli.HandleCheckBlockSize()
 	case "getblockhash":
 		// Verify that the required block index parameter has been adequately supplied prior to command parsing.
 		if len(os.Args) < 3 {
@@ -183,6 +188,7 @@ func printUsage() {
 	fmt.Println("  go run eterbit.go fees")
 	fmt.Println("  go run eterbit.go uptime")
 	fmt.Println("  go run eterbit.go getnettotals")
+	fmt.Println("  go run eterbit.go blocksize")
 	fmt.Println("  go run eterbit.go getblockhash <index>")
 	fmt.Println("  go run eterbit.go getblock <hash>")
 	fmt.Println("================================================================================")
