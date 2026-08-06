@@ -83,16 +83,16 @@ func (lc *LedgerCore) VerifyConsensusIntegrity() {
 	genesisHashHex := hex.EncodeToString(genesis.Hash)
 
 	// --- HARD FORK CONSENSUS FINGERPRINT CHECK ---
-	// Strict checkpoint validation: Halt immediately if the database genesis parameters or hash drift from the immutable active code rules.
+	// Strict checkpoint validation: Halt immediately if database genesis parameters or hash drift from immutable active code rules.
 	if genesis.Timestamp != genesisTimestamp || genesis.Nonce != genesisNonce || genesis.Bits != genesisBits || (HardcodedGenesisHash != "" && genesisHashHex != HardcodedGenesisHash) {
-		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] HARD FORK / ATURAN TIDAK VALID TERDETEKSI!\n"+
-			"Parameter genesis block di database tidak sinkron dengan aturan konsensus kodingan terbaru!\n"+
+		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] HARD FORK / INVALID RULES DETECTED!\n"+
+			"The genesis block parameters in the database are out of sync with the latest consensus code rules!\n"+
 			"--------------------------------------------------------------------------------\n"+
 			"Stored in Database -> Timestamp: %d | Nonce: %d | Bits: %d | Hash: %s\n"+
 			"Current Code Rules -> Timestamp: %d | Nonce: %d | Bits: %d | Checkpoint: %s\n"+
 			"--------------------------------------------------------------------------------\n"+
-			"Node menolak rantai ini demi menjaga kedaulatan konsensus.\n"+
-			"Solusi (Hard Fork Action): Hapus database lama (`rm -rf ~/.eterbit`) untuk memulai era rantai baru!\n",
+			"Node rejects this chain to preserve consensus sovereignty.\n"+
+			"Solution (Hard Fork Action): Wipe the legacy database (`rm -rf ~/.eterbit`) to start a new chain era!\n",
 			genesis.Timestamp, genesis.Nonce, genesis.Bits, genesisHashHex,
 			genesisTimestamp, genesisNonce, genesisBits, HardcodedGenesisHash))
 	}
