@@ -234,21 +234,24 @@ func (lc *LedgerCore) SpawnGenesis() {
 	// Compute the base block reward allocation specifically designated for block index zero.
 	exactReward := CalculateBlockReward(0)
 	
-	// --- GENESIS TIMESTAMP MESSAGE & FIXED PARAMS ---
+	// --- GENESIS HARDCODED CONSENSUS PARAMETERS ---
 	pszTimestamp := "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
-	const fixedGenesisTimestamp int64 = 1770249600 // Fixed static timestamp for strict deterministic genesis hash consistency
+	
+	const genesisTimestamp int64 = 1770249600 // Fixed static timestamp for strict deterministic genesis hash consistency
+	const genesisNonce uint64 = 0             // Fixed static nonce for genesis block
+	// ---------------------------------------------
 
 	genesis := &core.LedgerBlock{
 		Index:      0,
-		Timestamp:  fixedGenesisTimestamp,
+		Timestamp:  genesisTimestamp,
 		PrevHash:   make([]byte, 64), // 64 bytes to align fully with SHA3-512 standards
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
-		Nonce:      0,
+		Nonce:      genesisNonce,     // Using explicitly pinned genesis nonce
 		Difficulty: lc.Engine.TargetDifficulty,
-		Bits:       lc.Engine.Bits, // Set Genesis nBits
+		Bits:       lc.Engine.Bits,   // Using engine nBits / target bits
 		Reward:     exactReward,
-		Message:    pszTimestamp, // Embed genesis message string here
+		Message:    pszTimestamp,     // Embed genesis message string here
 	}
 	
 	// Execute the consensus mining algorithm to solve the genesis block proof-of-work puzzle.
