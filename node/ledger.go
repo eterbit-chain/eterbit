@@ -16,7 +16,6 @@
 package node
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sort"
