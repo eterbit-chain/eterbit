@@ -149,31 +149,13 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 		currentConsensusReward := consensus.BlockReward
 		currentMaxSupply := consensus.MaxSupply
 
-		// Rekonstruksi hash ulang genesis block dari data tersimpan untuk memvalidasi apakah MaxSupply / Reward berubah
-		tempEngine := core.NewConsensusEngine(storedGenesis.Difficulty)
-		testBlock := &core.LedgerBlock{
-			Index:      storedGenesis.Index,
-			Timestamp:  storedGenesis.Timestamp,
-			PrevHash:   storedGenesis.PrevHash,
-			Transfers:  storedGenesis.Transfers,
-			Miner:      storedGenesis.Miner,
-			Nonce:      storedGenesis.Nonce,
-			Difficulty: storedGenesis.Difficulty,
-			Bits:       storedGenesis.Bits,
-			Reward:     storedGenesis.Reward,
-			Message:    storedGenesis.Message,
-		}
-		_, recalculatedHash := tempEngine.Mine(testBlock)
-
 		// Dynamic Sovereign Hard Fork Guard: Enforce strict macro-economic consensus validation.
 		// If genesis parameters, reward, or max supply policies are altered in source code, instantly wipe storage and trigger a sovereign hard fork.
-		// Note: Karena MaxSupply sekarang ikut di-hash di AssembleBlockData, perubahan MaxSupply akan menghasilkan hash berbeda yang terdeteksi oleh Checkpoint / VerifyConsensusIntegrity,
-		// atau kita paksa reset jika parameter kode tidak sinkron.
-		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits || storedGenesis.Reward != currentConsensusReward {
+		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits || storedGenesis.Reward != currentConsensusReward || storedGenesis.MaxSupply != currentMaxSupply {
 			fmt.Println("\n================================================================================")
 			fmt.Println("[CONSENSUS EVENT] Genesis parameters or macroeconomic policies modified in code! Triggering Sovereign Hard Fork...")
-			fmt.Printf("OLD GENESIS -> Message: '%s' | Reward: %.8f | Timestamp: %d | Bits: %d\n", storedGenesis.Message, formatCoin(storedGenesis.Reward), storedGenesis.Timestamp, storedGenesis.Bits)
-			fmt.Printf("NEW GENESIS -> Message: '%s' | Reward: %.8f | Timestamp: %d | Bits: %d (MaxSupply Target: %.8f)\n", pszTimestamp, formatCoin(currentConsensusReward), genesisTimestamp, genesisBits, formatCoin(currentMaxSupply))
+			fmt.Printf("OLD GENESIS -> Message: '%s' | Reward: %.8f | MaxSupply: %.8f | Timestamp: %d | Bits: %d\n", storedGenesis.Message, formatCoin(storedGenesis.Reward), formatCoin(storedGenesis.MaxSupply), storedGenesis.Timestamp, storedGenesis.Bits)
+			fmt.Printf("NEW GENESIS -> Message: '%s' | Reward: %.8f | MaxSupply: %.8f | Timestamp: %d | Bits: %d\n", pszTimestamp, formatCoin(currentConsensusReward), formatCoin(currentMaxSupply), genesisTimestamp, genesisBits)
 			fmt.Println("[CONSENSUS EVENT] Automatically wiping storage and re-mining genesis block...")
 			fmt.Println("================================================================================")
 
@@ -186,9 +168,6 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 			lc.SpawnGenesis()
 			return true
 		}
-		
-		// Pastikan juga jika recalculation hash berbeda dari checkpoint akibat MaxSupply, picu hard fork
-		_ = recalculatedHash
 	}
 	
 	lc.VerifyConsensusIntegrity()
@@ -246,6 +225,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 		Difficulty: lc.Engine.TargetDifficulty,
 		Bits:       genesisBits,
 		Reward:     exactReward,
+		MaxSupply:  consensus.MaxSupply,
 		Message:    pszTimestamp,
 	}
 
@@ -258,7 +238,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 	lc.Storage.SaveBlock(0, genesis)
 	
 	fmt.Printf("[GENESIS] Block 0 Loaded/Spawned with message: '%s'\n", pszTimestamp)
-	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d | Hash: %x\n", genesisTimestamp, genesis.Nonce, genesis.Bits, genesis.Hash)
+	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d | MaxSupply: %.8f | Hash: %x\n", genesisTimestamp, genesis.Nonce, genesis.Bits, formatCoin(genesis.MaxSupply), genesis.Hash)
 }
 
 // AddToMempool validates and inserts a transaction payload into the pending mempool queue with Fee Market priority sorting.
@@ -421,6 +401,7 @@ func (lc *LedgerCore) MineBlock() {
 		Difficulty: lc.Engine.TargetDifficulty,
 		Bits:       lc.Engine.Bits,
 		Reward:     exactReward,
+		MaxSupply:  consensus.MaxSupply,
 	}
 
 	fmt.Printf("[MINER] Mining Block #%d with %d transactions (Dynamic Difficulty: %d)...\n", newBlock.Index, len(validTx), newBlock.Difficulty)
