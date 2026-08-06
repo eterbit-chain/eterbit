@@ -231,9 +231,8 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 
 // --- DYNAMIC CONSENSUS-ALIGNED GENESIS PARAMETERS ---
 const (
-	genesisTimestamp int64  = 1770249600 // Synchronized genesis timestamp
-	genesisNonce     uint64 = 12345      // Solved Proof-of-Work nonce matching active consensus specifications
-	pszTimestamp            = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
+	genesisTimestamp int64 = 1770249600 // Synchronized genesis timestamp
+	pszTimestamp           = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
 )
 // ----------------------------------------------------
 
@@ -248,7 +247,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 		PrevHash:   make([]byte, 64), // 64 bytes to align fully with SHA3-512 standards
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
-		Nonce:      genesisNonce,     // Explicitly pinned Genesis Nonce matching consensus
+		Nonce:      0,                // Diset mulai dari 0, dicari otomatis oleh engine Mine()
 		Difficulty: lc.Engine.TargetDifficulty,
 		Bits:       lc.Engine.Bits,   // Dynamic consensus engine nBits / target bits
 		Reward:     exactReward,
@@ -256,7 +255,8 @@ func (lc *LedgerCore) SpawnGenesis() {
 	}
 	
 	// Execute the consensus mining algorithm to solve the genesis block proof-of-work puzzle.
-	_, genesis.Hash = lc.Engine.Mine(genesis)
+	foundNonce, genesis.Hash := lc.Engine.Mine(genesis)
+	genesis.Nonce = foundNonce
 	genesis.Reward = exactReward // Protect the genesis reward value against external modifications.
 
 	// Append the newly minted genesis block to the local chain array and persist it to storage.
@@ -264,7 +264,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 	lc.Storage.SaveBlock(0, genesis)
 	
 	fmt.Printf("[GENESIS] Block 0 Created with message: '%s'\n", pszTimestamp)
-	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d | Hash: %x\n", genesisTimestamp, genesisNonce, genesis.Bits, genesis.Hash)
+	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce Found: %d | Bits: %d | Hash: %x\n", genesisTimestamp, genesis.Nonce, genesis.Bits, genesis.Hash)
 }
 
 // AddToMempool validates and inserts a transaction payload into the pending mempool queue with Fee Market priority sorting.
