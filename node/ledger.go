@@ -27,6 +27,7 @@ import (
 	"eterbit/core"
 	"eterbit/internal/consensus"
 	"eterbit/storage"
+	"eterbit/storage/wallet"
 )
 
 // Hardcoded Genesis Hash checkpoint linked directly to the immutable consensus specifications.
@@ -191,7 +192,7 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 	// Iterate through all transfer transactions recorded within the processed block.
 	for _, tx := range block.Transfers {
-		sender := hex.EncodeToString(tx.SenderPubKey[:16])
+		sender := wallet.PubKeyToAddress(tx.SenderPubKey)
 		if _, ok := lc.State[sender]; !ok {
 			lc.State[sender] = &AccountState{Balance: 0, Nonce: 0}
 		}
@@ -280,7 +281,7 @@ func (lc *LedgerCore) AddToMempool(tx *core.Transfer) bool {
 		return false
 	}
 
-	sender := hex.EncodeToString(tx.SenderPubKey[:16])
+	sender := wallet.PubKeyToAddress(tx.SenderPubKey)
 	acc, exists := lc.State[sender]
 	
 	// Initialize account states if missing.
@@ -371,7 +372,7 @@ func (lc *LedgerCore) MineBlock() {
 		// Process each priority transaction, updating sender balances and nonce states accordingly.
 		for i := 0; i < limit; i++ {
 			tx := lc.Mempool[i]
-			sender := hex.EncodeToString(tx.SenderPubKey[:16])
+			sender := wallet.PubKeyToAddress(tx.SenderPubKey)
 			
 			if _, ok := lc.State[sender]; !ok {
 				lc.State[sender] = &AccountState{Balance: 0, Nonce: 0}
