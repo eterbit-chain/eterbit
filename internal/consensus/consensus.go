@@ -27,56 +27,49 @@ import (
 // PoWLimit defines the maximum target difficulty limit in Big Integer 256-bit representation.
 var PoWLimit, _ = new(big.Int).SetString("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
 
-// Immutable Network & Macroeconomic Constants (Hardcoded Rules - Cannot be altered arbitrarily)
+// Immutable Network & Macroeconomic Constants (Hardcoded Rules)
 const (
 	CoinUnit            uint64 = 100000000             // 8 Decimals precision factor
 	MaxSupply           uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
 	BlockReward         uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
 	HalvingInterval     uint64 = 7850000               // Strict Halving Block Interval
 	DefaultPort         int    = 19333                 // Default P2P Network Port
-	AddressPrefix       string = "etrb"                // Immutable Wallet Address Prefix (Clean without underscore)
-	GenesisBits         uint32 = 0x1e0ffff0            // Compact difficulty bits representation ala Bitcoin Core
+	AddressPrefix       string = "etrb"                // Immutable Wallet Address Prefix
+	GenesisBits         uint32 = 0x1e0ffff0            // Compact difficulty bits representation
 
 	// Proof-of-Work Target Parameters
-	PowTargetTimespan   int64  = 2 * 24 * 60 * 60 // Difficulty adjustment span (e.g., 2 Days)
-	PowTargetSpacing    int64  = 35               // Target block time spacing in seconds
-	TargetBlockTimeSec  int64  = PowTargetSpacing // Backward compatibility alias for target block time
+	PowTargetTimespan   int64  = 2 * 24 * 60 * 60 
+	PowTargetSpacing    int64  = 35               
+	TargetBlockTimeSec  int64  = PowTargetSpacing 
 
-	// ExpectedGenesisHash stores the immutable hardcoded hash checkpoint of the Eterbit Genesis block (Keccak-256).
-	ExpectedGenesisHash string = "00000d7459efbb41ee2c55b66e476983c19f09d21a29023fb1f7ab245b07b580"
+	// ExpectedGenesisHash stores the immutable cryptographic hash checkpoint.
+	// Jika MaxSupply atau BlockReward diubah, hash ini wajib disesuaikan atau node akan menolak rantai.
+	ExpectedGenesisHash string = "0000020d84c86eea5b73612b402070523b7634b313d9c62db471a5660d42e598"
 )
 
-// CheckpointData represents a hardcoded historical block height and its immutable cryptographic hash checkpoint.
-type CheckpointData struct {
-	Height uint64
-	Hash   string
-}
-
-// HardcodedCheckpoints stores trusted historical checkpoints to prevent history rewrites and tampering.
+// HardcodedCheckpoints stores trusted historical checkpoints.
 var HardcodedCheckpoints = map[uint64]string{
 	0: ExpectedGenesisHash,
-	// Add future trusted block checkpoints here as the network grows:
-	// 10000: "some_block_hash_hex...",
 }
 
-// ConsensusParameters defines the fixed macroeconomic and mathematical rules for the Eterbit ledger.
+// ConsensusParameters defines fixed macroeconomic rules.
 type ConsensusParameters struct {
-	DifficultyBits    uint64 // Target difficulty level / factor
-	GenesisBits       uint32 // Compact difficulty bits representation
-	BlockReward       uint64 // Initial minting reward per block (with 8 decimals precision)
-	MaxSupply         uint64 // Maximum cap for token issuance (with 8 decimals precision)
-	HalvingInterval   uint64 // Interval blocks for halving
-	DefaultPort       int    // Hardcoded network port
-	AddressPrefix     string // Hardcoded wallet address prefix
-	PowTargetTimespan int64  // Difficulty adjustment timespan
-	PowTargetSpacing  int64  // Target block time spacing
+	DifficultyBits    uint64 
+	GenesisBits       uint32 
+	BlockReward       uint64 
+	MaxSupply         uint64 
+	HalvingInterval   uint64 
+	DefaultPort       int    
+	AddressPrefix     string 
+	PowTargetTimespan int64  
+	PowTargetSpacing  int64  
 }
 
-// DefaultConsensus returns the standard operational consensus rules for Eterbit using PoWLimit baseline.
+// DefaultConsensus returns standard operational consensus rules.
 func DefaultConsensus() *ConsensusParameters {
 	return &ConsensusParameters{
-		DifficultyBits:    1,             // Initial baseline factor multiplier
-		GenesisBits:       GenesisBits,   // Compact target bits
+		DifficultyBits:    1,
+		GenesisBits:       GenesisBits,
 		BlockReward:       BlockReward,
 		MaxSupply:         MaxSupply,
 		HalvingInterval:   HalvingInterval,
@@ -96,8 +89,7 @@ func CalculateBlockReward(blockIndex uint64) uint64 {
 	return BlockReward >> halvings
 }
 
-// CalculateNextDifficulty implements a dynamic difficulty adjustment
-// based on the time taken to process the previous block compared to TargetBlockTimeSec.
+// CalculateNextDifficulty implements a dynamic difficulty adjustment.
 func CalculateNextDifficulty(prevBlockTimestamp int64, currentBlockTimestamp int64, prevDifficulty uint64) uint64 {
 	if prevBlockTimestamp == 0 || currentBlockTimestamp <= prevBlockTimestamp {
 		if prevDifficulty < 1 {
@@ -124,7 +116,7 @@ func CalculateNextDifficulty(prevBlockTimestamp int64, currentBlockTimestamp int
 	return newDifficulty
 }
 
-// ValidatePoW verifies whether a given block header hash satisfies the target difficulty limit using pure Big Integer evaluation.
+// ValidatePoW verifies whether a given block header hash satisfies the target difficulty limit.
 func ValidatePoW(blockHashHex string, difficultyBits uint64) bool {
 	hashInt := new(big.Int)
 	hashBytes, err := hex.DecodeString(blockHashHex)
@@ -133,29 +125,29 @@ func ValidatePoW(blockHashHex string, difficultyBits uint64) bool {
 	}
 	hashInt.SetBytes(hashBytes)
 
-	// Hash must not exceed the absolute PoWLimit threshold
 	if hashInt.Cmp(PoWLimit) > 0 {
 		return false
 	}
 
-	// Derive target difficulty by shifting PoWLimit based on difficulty bits factor
 	target := new(big.Int).Set(PoWLimit)
 	if difficultyBits > 1 {
 		target.Rsh(target, uint(difficultyBits))
 	}
 
-	// Valid if hashInt <= target
 	return hashInt.Cmp(target) <= 0
 }
 
-// ComputeHeaderHash calculates the cryptographic Keccak-256 hash representation for block validation, including the optional genesis message.
+// ComputeHeaderHash calculates the cryptographic Keccak-256 hash representation, now bound tightly with macroeconomic parameters.
 func ComputeHeaderHash(prevHash string, merkleRoot string, timestamp int64, nonce uint64, message string) string {
+	// Mengikat MaxSupply dan BlockReward langsung ke dalam payload hash header agar setiap perubahan ekonomi memicu hard fork mutlak ala Bitcoin!
 	record := bytes.Join([][]byte{
 		[]byte(prevHash),
 		[]byte(merkleRoot),
 		big.NewInt(timestamp).Bytes(),
 		big.NewInt(int64(nonce)).Bytes(),
 		[]byte(message),
+		big.NewInt(int64(MaxSupply)).Bytes(),
+		big.NewInt(int64(BlockReward)).Bytes(),
 	}, []byte{})
 
 	d := sha3.NewLegacyKeccak256()
@@ -178,7 +170,7 @@ func VerifyGenesisCheckpoint(blockHash []byte) error {
 func VerifyCheckpoint(height uint64, blockHash []byte) error {
 	expectedHash, exists := HardcodedCheckpoints[height]
 	if !exists {
-		return nil // No checkpoint defined for this height, skip verification safely
+		return nil 
 	}
 
 	actualHashHex := hex.EncodeToString(blockHash)
@@ -188,7 +180,18 @@ func VerifyCheckpoint(height uint64, blockHash []byte) error {
 	return nil
 }
 
-// VerifyBlockReward checks if the distributed block reward and transaction fees adhere to protocol limits.
-func VerifyBlockReward(rewardClaimed uint64, feesCollected uint64, standardReward uint64) bool {
-	return rewardClaimed <= (standardReward + feesCollected)
+// VerifyBlockReward strictly checks if the distributed block reward adheres to protocol limits.
+func VerifyBlockReward(rewardClaimed uint64, feesCollected uint64, blockIndex uint64, currentSupply uint64) error {
+	standardReward := CalculateBlockReward(blockIndex)
+	
+	if currentSupply >= MaxSupply {
+		standardReward = 0
+	} else if currentSupply+standardReward > MaxSupply {
+		standardReward = MaxSupply - currentSupply
+	}
+
+	if rewardClaimed > (standardReward + feesCollected) {
+		return fmt.Errorf("CONSENSUS REJECTION: Reward claimed (%d) exceeds allowed protocol limit (%d)", rewardClaimed, standardReward+feesCollected)
+	}
+	return nil
 }
