@@ -58,7 +58,16 @@ func ValidateBlockConsensus(block *LedgerBlock, prevBlock *LedgerBlock, currentT
 		return fmt.Errorf("CONSENSUS ERROR: Block header hash fails to satisfy target difficulty bits")
 	}
 
-	// 4. Execute precise macroeconomic validation: Block reward and immutable Max Supply enforcement.
+	// 4. Enforce strict MaxSupply consistency matching active protocol consensus parameters.
+	blockMaxSupply := block.MaxSupply
+	if blockMaxSupply == 0 {
+		blockMaxSupply = consensus.MaxSupply
+	}
+	if blockMaxSupply != consensus.MaxSupply {
+		return fmt.Errorf("CONSENSUS REJECTION: Block MaxSupply (%d) does not match active network consensus MaxSupply (%d)", blockMaxSupply, consensus.MaxSupply)
+	}
+
+	// 5. Execute precise macroeconomic validation: Block reward and immutable Max Supply enforcement.
 	expectedReward := consensus.CalculateBlockReward(block.Index)
 	
 	// Terminate coin issuance completely if cumulative circulating supply has reached the hard-coded maximum cap.
