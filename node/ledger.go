@@ -243,12 +243,6 @@ func (lc *LedgerCore) SpawnGenesis() {
 	// Compute the base block reward allocation specifically designated for block index zero.
 	exactReward := CalculateBlockReward(0)
 
-	// Decode the hardcoded constant genesis hash from hex string format to byte slice.
-	genesisHashBytes, err := hex.DecodeString(HardcodedGenesisHash)
-	if err != nil {
-		panic(fmt.Sprintf("[FATAL GENESIS ERROR] Failed to decode hardcoded genesis hash: %v", err))
-	}
-
 	genesis := &core.LedgerBlock{
 		Index:      0,
 		Timestamp:  genesisTimestamp,
@@ -260,8 +254,13 @@ func (lc *LedgerCore) SpawnGenesis() {
 		Bits:       genesisBits,              // Hardcoded nBits / target bits matching the checkpoint
 		Reward:     exactReward,
 		Message:    pszTimestamp,             // Embed genesis message string here
-		Hash:       genesisHashBytes,         // Enforce locked immutable genesis hash
 	}
+
+	// Let the consensus engine dynamically calculate the true mathematical hash based on the current block structure and message content.
+	foundNonce, foundHash := lc.Engine.Mine(genesis)
+	genesis.Nonce = foundNonce
+	genesis.Hash = foundHash
+	genesis.Reward = exactReward
 
 	// Append the newly minted genesis block to the local chain array and persist it to storage.
 	lc.Chain = append(lc.Chain, genesis)
