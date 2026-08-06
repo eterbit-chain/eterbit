@@ -66,21 +66,22 @@ func NewConsensusEngine(difficulty uint32) *ConsensusEngine {
 	}
 }
 
-// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, candidate nonce, and genesis message into a unified byte array for hashing.
+// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, max supply, candidate nonce, and genesis message into a unified byte array for hashing.
 func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byte {
 	var rawTxData []byte
 	// Concatenate all transfer signatures included in the block payload.
 	for _, tx := range b.Transfers {
 		rawTxData = append(rawTxData, tx.Signature...)
 	}
-	// Join all block components including Reward and Message into a single canonical byte array representation.
+	// Join all block components including Reward, MaxSupply, and Message into a single canonical byte array representation.
 	return bytes.Join([][]byte{
 		b.PrevHash,
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
-		[]byte(strconv.FormatUint(b.Reward, 16)),             // Include reward to ensure macro-economic hard fork sensitivity
-		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)), // Fixed: cast uint32 to uint64
+		[]byte(strconv.FormatUint(b.Reward, 16)),             // Include reward for macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(consensus.MaxSupply, 16)), // Include max supply for macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)),
 		[]byte(strconv.FormatUint(nonce, 16)),
 		[]byte(b.Message), // Include message in PoW hashing calculation
 	}, []byte{})
