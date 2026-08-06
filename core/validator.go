@@ -8,6 +8,7 @@ package core
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -17,7 +18,7 @@ import (
 // ValidateBlockConsensus rigorously evaluates incoming block structures against 
 // immutable cryptographic consensus parameters. 
 // Enforces strict Bitcoin-grade protocol compliance: rejects any unauthorized 
-// reward manipulation, max supply breaches, halving interval mismatches, invalid proof-of-work proofs, or malformed address prefixes.
+// reward manipulation, max supply breaches, halving interval mismatches, block size limit breaches, invalid proof-of-work proofs, or malformed address prefixes.
 func ValidateBlockConsensus(block *LedgerBlock, prevBlock *LedgerBlock, currentTotalSupply uint64) error {
 	// 1. Validate sequential block height index progression and chronological integrity.
 	if prevBlock != nil {
@@ -76,7 +77,17 @@ func ValidateBlockConsensus(block *LedgerBlock, prevBlock *LedgerBlock, currentT
 		return fmt.Errorf("CONSENSUS REJECTION: Block HalvingInterval (%d) does not match active network consensus HalvingInterval (%d)", blockHalvingInterval, consensus.HalvingInterval)
 	}
 
-	// 5. Execute precise macroeconomic validation: Block reward and immutable Max Supply enforcement.
+	// 5. Enforce strict Block Size Limit validation (4 MB Max Limit for Dilithium-3 transactions)
+	blockBytes, err := json.Marshal(block)
+	if err != nil {
+		return fmt.Errorf("CONSENSUS REJECTION: Failed to serialize block for size validation: %v", err)
+	}
+	
+	if uint64(len(blockBytes)) > consensus.MaxBlockSizeBytes {
+		return fmt.Errorf("CONSENSUS REJECTION: Block size (%d bytes) exceeds maximum allowed limit (%d bytes)", len(blockBytes), consensus.MaxBlockSizeBytes)
+	}
+
+	// 6. Execute precise macroeconomic validation: Block reward and immutable Max Supply enforcement.
 	expectedReward := consensus.CalculateBlockReward(block.Index)
 	
 	// Terminate coin issuance completely if cumulative circulating supply has reached the hard-coded maximum cap.
