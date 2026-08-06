@@ -46,7 +46,7 @@ func GetDataDir() string {
 
 // SaveMempoolToDisk serializes the active transaction queue and persists it to external disk storage.
 func SaveMempoolToDisk(mempool []*core.Transfer) {
-	data, _ := json.MarshalIndent(mempool, "", "   ")
+	data, _ := json.MarshalIndent(mempool, "", "    ")
 	os.WriteFile(filepath.Join(GetDataDir(), "mempool.json"), data, 0644)
 }
 
@@ -165,9 +165,11 @@ func HandleSendTx(recipient string, amount uint64, fee uint64, senderAddr string
 	}
 
 	ledger := node.InitializeLedger(dataDir, 1, selectedAccount.Address)
-	ledger.State[selectedAccount.Address] = &node.AccountState{Balance: node.InitialAirdrop, Nonce: 0}
 	
-	currentNonce := ledger.State[selectedAccount.Address].Nonce + uint64(time.Now().UnixNano()%100000)
+	currentNonce := uint64(0)
+	if accState, exists := ledger.State[selectedAccount.Address]; exists {
+		currentNonce = accState.Nonce + uint64(time.Now().UnixNano()%100000)
+	}
 
 	fmt.Printf("[CLI] Constructing transaction from %s to %s (Amount: %.8f, Fee: %.8f)...\n", selectedAccount.Address, recipient, node.ToDecimal(amount), node.ToDecimal(fee))
 
@@ -314,7 +316,7 @@ func HandleCheckUptime() {
 // HandleGetNetTotals retrieves and displays network traffic statistics.
 func HandleGetNetTotals() {
 	totals := internal.GetNetTotals()
-	out, _ := json.MarshalIndent(totals, "", "   ")
+	out, _ := json.MarshalIndent(totals, "", "    ")
 	fmt.Println(string(out))
 }
 
@@ -353,7 +355,7 @@ func HandleGetBlock(targetHash string) {
 		return
 	}
 
-	jsonData, err := json.MarshalIndent(foundBlock, "", "   ")
+	jsonData, err := json.MarshalIndent(foundBlock, "", "    ")
 	if err != nil {
 		return
 	}
