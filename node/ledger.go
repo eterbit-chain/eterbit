@@ -334,16 +334,19 @@ func (lc *LedgerCore) MineBlock() {
 	var feeTotal uint64 = 0
 
 	if len(lc.Mempool) > 0 {
-		maxTxPerBlock := 10
-		limit := len(lc.Mempool)
-		if limit > maxTxPerBlock {
-			limit = maxTxPerBlock
-		}
+		var currentBlockBytes uint64 = 512 // Estimasi dasar header blok
 
-		for i := 0; i < limit; i++ {
+		for i := 0; i < len(lc.Mempool); i++ {
 			tx := lc.Mempool[i]
-			sender := crypto.PubkeyToAddress(tx.SenderPubKey)
 			
+			// Serialisasi transaksi untuk mengukur ukuran byte secara akurat demi mematuhi batas 4 MB
+			txBytes, err := json.Marshal(tx)
+			txSize := uint64(len(txBytes))
+			if err != nil || currentBlockBytes+txSize > consensus.MaxBlockSizeBytes {
+				break // Hentikan pengambilan transaksi jika total ukuran blok mendekati atau melebihi batas 4 MB
+			}
+
+			sender := crypto.PubkeyToAddress(tx.SenderPubKey)
 			if _, ok := lc.State[sender]; !ok {
 				lc.State[sender] = &AccountState{Balance: 0, Nonce: 0}
 			}
@@ -365,11 +368,14 @@ func (lc *LedgerCore) MineBlock() {
 			}
 
 			feeTotal += tx.Fee
+			currentBlockBytes += txSize
 			validTx = append(validTx, tx)
 			fmt.Printf("[MINER] -> Processing Priority Tx: %.8f Coins to %s (Fee: %.8f)\n", formatCoin(tx.Value), tx.Recipient, formatCoin(tx.Fee))
 		}
 		
-		lc.Mempool = lc.Mempool[limit:]
+		if len(validTx) > 0 {
+			lc.Mempool = lc.Mempool[len(validTx):]
+		}
 	}
 	lc.Mu.Unlock()
 
