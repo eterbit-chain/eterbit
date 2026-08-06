@@ -33,18 +33,19 @@ const MaxEterbitSupply uint64 = consensus.MaxSupply / consensus.CoinUnit // Alig
 
 // LedgerBlock represents the core structural block entity containing transactional ledger data, cryptographic hashes, and consensus metadata.
 type LedgerBlock struct {
-	Index      uint64      `json:"index"`
-	Timestamp  int64       `json:"timestamp"`
-	PrevHash   []byte      `json:"prev_hash"`
-	Hash       []byte      `json:"hash"`
-	Transfers  []*Transfer `json:"transfers"`
-	Miner      string      `json:"miner"`
-	Nonce      uint64      `json:"nonce"`
-	Difficulty uint32      `json:"difficulty"`
-	Bits       uint32      `json:"bits"`         // Compact target difficulty bits representation (nBits)
-	Reward     uint64      `json:"reward"`
-	MaxSupply  uint64      `json:"max_supply"`   // Bound directly to enable true cryptographic sovereign hard fork sensitivity
-	Message    string      `json:"message,omitempty"` // Added pszTimestamp equivalent field
+	Index           uint64      `json:"index"`
+	Timestamp       int64       `json:"timestamp"`
+	PrevHash        []byte      `json:"prev_hash"`
+	Hash            []byte      `json:"hash"`
+	Transfers       []*Transfer `json:"transfers"`
+	Miner           string      `json:"miner"`
+	Nonce           uint64      `json:"nonce"`
+	Difficulty      uint32      `json:"difficulty"`
+	Bits            uint32      `json:"bits"`             // Compact target difficulty bits representation (nBits)
+	Reward          uint64      `json:"reward"`
+	MaxSupply       uint64      `json:"max_supply"`       // Bound directly to enable true cryptographic sovereign hard fork sensitivity
+	HalvingInterval uint64      `json:"halving_interval"` // Bound directly to alter PoW fingerprint on halving policy change
+	Message         string      `json:"message,omitempty"` // Added pszTimestamp equivalent field
 }
 
 // GetBlockReward dynamically computes the block reward using the centralized consensus package.
@@ -67,7 +68,7 @@ func NewConsensusEngine(difficulty uint32) *ConsensusEngine {
 	}
 }
 
-// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, max supply, candidate nonce, and genesis message into a unified byte array for hashing.
+// AssembleBlockData serializes and concatenates block headers, transactional payloads, reward, max supply, halving interval, candidate nonce, and genesis message into a unified byte array for hashing.
 func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byte {
 	var rawTxData []byte
 	// Concatenate all transfer signatures included in the block payload.
@@ -81,14 +82,21 @@ func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byt
 		blockMaxSupply = consensus.MaxSupply
 	}
 
-	// Join all block components including Reward, MaxSupply, and Message into a single canonical byte array representation.
+	// Fallback to active consensus HalvingInterval if block struct field is uninitialized
+	blockHalvingInterval := b.HalvingInterval
+	if blockHalvingInterval == 0 {
+		blockHalvingInterval = consensus.HalvingInterval
+	}
+
+	// Join all block components including Reward, MaxSupply, HalvingInterval, and Message into a single canonical byte array representation.
 	return bytes.Join([][]byte{
 		b.PrevHash,
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
-		[]byte(strconv.FormatUint(b.Reward, 16)),         // Include reward for macro-economic hard fork sensitivity
-		[]byte(strconv.FormatUint(blockMaxSupply, 16)),  // Include block-bound max supply for true sovereign hard fork sensitivity
+		[]byte(strconv.FormatUint(b.Reward, 16)),               // Include reward for macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(blockMaxSupply, 16)),        // Include block-bound max supply for true sovereign hard fork sensitivity
+		[]byte(strconv.FormatUint(blockHalvingInterval, 16)),  // Include halving interval to trigger hash fingerprint changes on modification
 		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)),
 		[]byte(strconv.FormatUint(nonce, 16)),
 		[]byte(b.Message), // Include message in PoW hashing calculation
@@ -106,6 +114,11 @@ func (ce *ConsensusEngine) Mine(b *LedgerBlock) (uint64, []byte) {
 	// Ensure block MaxSupply reflects active consensus rule if uninitialized
 	if b.MaxSupply == 0 {
 		b.MaxSupply = consensus.MaxSupply
+	}
+
+	// Ensure block HalvingInterval reflects active consensus rule if uninitialized
+	if b.HalvingInterval == 0 {
+		b.HalvingInterval = consensus.HalvingInterval
 	}
 
 	// Ensure the block carries the proper bits configuration
