@@ -17,7 +17,7 @@ import (
 // ValidateBlockConsensus rigorously evaluates incoming block structures against 
 // immutable cryptographic consensus parameters. 
 // Enforces strict Bitcoin-grade protocol compliance: rejects any unauthorized 
-// reward manipulation, max supply breaches, invalid proof-of-work proofs, or malformed address prefixes.
+// reward manipulation, max supply breaches, halving interval mismatches, invalid proof-of-work proofs, or malformed address prefixes.
 func ValidateBlockConsensus(block *LedgerBlock, prevBlock *LedgerBlock, currentTotalSupply uint64) error {
 	// 1. Validate sequential block height index progression and chronological integrity.
 	if prevBlock != nil {
@@ -65,6 +65,15 @@ func ValidateBlockConsensus(block *LedgerBlock, prevBlock *LedgerBlock, currentT
 	}
 	if blockMaxSupply != consensus.MaxSupply {
 		return fmt.Errorf("CONSENSUS REJECTION: Block MaxSupply (%d) does not match active network consensus MaxSupply (%d)", blockMaxSupply, consensus.MaxSupply)
+	}
+
+	// Enforce strict HalvingInterval consistency matching active protocol consensus parameters.
+	blockHalvingInterval := block.HalvingInterval
+	if blockHalvingInterval == 0 {
+		blockHalvingInterval = consensus.HalvingInterval
+	}
+	if blockHalvingInterval != consensus.HalvingInterval {
+		return fmt.Errorf("CONSENSUS REJECTION: Block HalvingInterval (%d) does not match active network consensus HalvingInterval (%d)", blockHalvingInterval, consensus.HalvingInterval)
 	}
 
 	// 5. Execute precise macroeconomic validation: Block reward and immutable Max Supply enforcement.
