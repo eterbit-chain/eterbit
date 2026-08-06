@@ -92,13 +92,13 @@ func (lc *LedgerCore) VerifyConsensusIntegrity() {
 		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] *** AUTOMATIC HARD FORK ACTIVATED ***\n"+
 			"The active consensus rules or genesis parameters in the code have been modified!\n"+
 			"--------------------------------------------------------------------------------\n"+
-			"DATABASE STORED -> Message: '%s' | Nonce: %d | Bits: %d | Reward: %d | Hash: %s\n"+
-			"CURRENT CODE    -> Message: '%s' | Nonce: %d | Bits: %d | Reward: %d | Checkpoint: %s\n"+
+			"DATABASE STORED -> Message: '%s' | Timestamp: %d | Nonce: %d | Bits: %d | Reward: %d | Hash: %s\n"+
+			"CURRENT CODE    -> Message: '%s' | Timestamp: %d | Nonce: %d | Bits: %d | Reward: %d | Checkpoint: %s\n"+
 			"--------------------------------------------------------------------------------\n"+
 			"Node rejects this chain to preserve strict consensus sovereignty.\n"+
 			"Solution (Hard Fork Action): Wipe the legacy database (`rm -rf ~/.eterbit`) to start a new chain era!\n",
-			genesis.Message, genesis.Nonce, genesis.Bits, genesis.Reward, genesisHashHex,
-			pszTimestamp, genesisNonce, genesisBits, expectedGenesisReward, HardcodedGenesisHash))
+			genesis.Message, genesis.Timestamp, genesis.Nonce, genesis.Bits, genesis.Reward, genesisHashHex,
+			pszTimestamp, genesisTimestamp, genesisNonce, genesisBits, expectedGenesisReward, HardcodedGenesisHash))
 	}
 
 	if err := consensus.VerifyGenesisCheckpoint(genesis.Hash); err != nil {
