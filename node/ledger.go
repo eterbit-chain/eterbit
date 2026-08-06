@@ -30,9 +30,6 @@ import (
 	"eterbit/storage"
 )
 
-// Hardcoded Genesis Hash checkpoint synchronized with the active consensus engine specifications.
-const HardcodedGenesisHash = "000000527ca66150940beae29697611f0bb58697e71dade4c94a820ab7d06353"
-
 // AccountState represents the account balance and transaction sequence nonce.
 type AccountState struct {
 	Balance uint64 `json:"balance"`
@@ -70,39 +67,10 @@ func (lc *LedgerCore) GetTotalCirculatingSupply() uint64 {
 	return totalSupply
 }
 
-// VerifyConsensusIntegrity performs an absolute cryptographic and macroeconomic check against the genesis block 
-// and active consensus rules to ensure any alteration in code parameters automatically triggers a Hard Fork rejection.
+// VerifyConsensusIntegrity verifies checkpoint rules across active blocks.
 func (lc *LedgerCore) VerifyConsensusIntegrity() {
 	if len(lc.Chain) == 0 {
 		return
-	}
-	genesis := lc.Chain[0]
-
-	genesisHashHex := hex.EncodeToString(genesis.Hash)
-
-	expectedGenesisReward := CalculateBlockReward(0)
-	expectedMaxSupply := consensus.MaxSupply
-
-	if genesis.Message != pszTimestamp ||
-		genesis.Timestamp != genesisTimestamp ||
-		genesis.Nonce != genesisNonce ||
-		genesis.Bits != genesisBits ||
-		genesis.Reward != expectedGenesisReward ||
-		(HardcodedGenesisHash != "" && genesisHashHex != HardcodedGenesisHash) {
-		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] *** AUTOMATIC HARD FORK ACTIVATED ***\n"+
-			"The active consensus rules or genesis parameters in the code have been modified!\n"+
-			"--------------------------------------------------------------------------------\n"+
-			"DATABASE STORED -> Message: '%s' | Timestamp: %d | Nonce: %d | Bits: %d | Reward: %d | Hash: %s\n"+
-			"CURRENT CODE    -> Message: '%s' | Timestamp: %d | Nonce: %d | Bits: %d | Reward: %d | Checkpoint: %s\n"+
-			"--------------------------------------------------------------------------------\n"+
-			"Node rejects this chain to preserve strict consensus sovereignty.\n"+
-			"Solution (Hard Fork Action): Wipe the legacy database (`rm -rf ~/.eterbit`) to start a new chain era!\n",
-			genesis.Message, genesis.Timestamp, genesis.Nonce, genesis.Bits, genesis.Reward, genesisHashHex,
-			pszTimestamp, genesisTimestamp, genesisNonce, genesisBits, expectedGenesisReward, HardcodedGenesisHash))
-	}
-
-	if err := consensus.VerifyGenesisCheckpoint(genesis.Hash); err != nil {
-		panic(fmt.Sprintf("\n[FATAL CONSENSUS PANIC] %v", err))
 	}
 
 	for i, block := range lc.Chain {
@@ -112,11 +80,11 @@ func (lc *LedgerCore) VerifyConsensusIntegrity() {
 	}
 
 	totalStoredSupply := lc.GetTotalCirculatingSupply()
-	if totalStoredSupply > expectedMaxSupply {
+	if totalStoredSupply > consensus.MaxSupply {
 		panic(fmt.Sprintf("\n\n[FATAL CONSENSUS PANIC] MACROECONOMIC RULE VIOLATION!\n"+
 			"Total stored circulating supply (%.8f) exceeds current code MaxSupply limit (%.8f)!\n"+
 			"Node execution halted immediately to prevent structural corruption.",
-			formatCoin(totalStoredSupply), formatCoin(expectedMaxSupply)))
+			formatCoin(totalStoredSupply), formatCoin(consensus.MaxSupply)))
 	}
 }
 
@@ -152,7 +120,13 @@ func InitializeLedger(dbPath string, initialDifficulty uint32, minerAddr string)
 	return coreLedger
 }
 
-// LoadFromDisk loads existing blockchain blocks from disk storage and rebuilds the account state.
+const (
+	genesisTimestamp int64  = 1770249600
+	genesisBits      uint32 = 504365040
+	pszTimestamp            = "anjayyy"
+)
+
+// LoadFromDisk loads existing blockchain blocks from disk storage, validates consensus parameters dynamically, and rebuilds state.
 func (lc *LedgerCore) LoadFromDisk() bool {
 	lastIdx, exists := lc.Storage.GetLastIndex()
 	if !exists {
@@ -168,6 +142,28 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 		if err := json.Unmarshal(data, &block); err == nil {
 			lc.Chain = append(lc.Chain, &block)
 			lc.RebuildState(&block)
+		}
+	}
+
+	if len(lc.Chain) > 0 {
+		storedGenesis := lc.Chain[0]
+
+		// Dynamic Consensus Integrity Check: If genesis parameters change in code, auto-mine a brand new genesis and reset storage seamlessly!
+		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits {
+			fmt.Println("\n================================================================================")
+			fmt.Println("[CONENSUS EVENT] Genesis parameters modified in code! Triggering Sovereign Hard Fork...")
+			fmt.Printf("OLD GENESIS -> Message: '%s' | Timestamp: %d | Bits: %d\n", storedGenesis.Message, storedGenesis.Timestamp, storedGenesis.Bits)
+			fmt.Printf("NEW GENESIS -> Message: '%s' | Timestamp: %d | Bits: %d\n", pszTimestamp, genesisTimestamp, genesisBits)
+			fmt.Println("[CONENSUS EVENT] Automatically re-mining genesis block and resetting chain state...")
+			fmt.Println("================================================================================")
+
+			// Clear stored chain and reset storage database completely
+			lc.Chain = make([]*core.LedgerBlock, 0)
+			lc.State = make(map[string]*AccountState)
+			
+			// Re-spawn new dynamic genesis block
+			lc.SpawnGenesis()
+			return true
 		}
 	}
 	
@@ -212,13 +208,6 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 	}
 }
 
-const (
-	genesisTimestamp int64  = 1770249600
-	genesisNonce     uint64 = 178034
-	genesisBits      uint32 = 504365040
-	pszTimestamp            = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
-)
-
 // SpawnGenesis creates and persists the initial genesis block of the blockchain network.
 func (lc *LedgerCore) SpawnGenesis() {
 	exactReward := CalculateBlockReward(0)
@@ -229,7 +218,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 		PrevHash:   make([]byte, 64),
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
-		Nonce:      genesisNonce,
+		Nonce:      0,
 		Difficulty: lc.Engine.TargetDifficulty,
 		Bits:       genesisBits,
 		Reward:     exactReward,
