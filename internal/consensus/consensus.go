@@ -29,22 +29,22 @@ var PoWLimit, _ = new(big.Int).SetString("00000fffffffffffffffffffffffffffffffff
 
 // Immutable Network & Macroeconomic Constants (Hardcoded Rules)
 const (
-	CoinUnit            uint64 = 100000000             // 8 Decimals precision factor
-	MaxSupply           uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
-	BlockReward         uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
-	HalvingInterval     uint64 = 7850000               // Strict Halving Block Interval
-	DefaultPort         int    = 19333                 // Default P2P Network Port
-	AddressPrefix       string = "etrb"                // Immutable Wallet Address Prefix
-	GenesisBits         uint32 = 0x1e0ffff0            // Compact difficulty bits representation
+	CoinUnit           uint64 = 100000000             // 8 Decimals precision factor
+	MaxSupply          uint64 = 785000000 * CoinUnit // Fixed Maximum Cap: 785 Million Units
+	BlockReward        uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
+	HalvingInterval    uint64 = 7850000               // Strict Halving Block Interval
+	DefaultPort        int    = 19333                 // Default P2P Network Port
+	AddressPrefix      string = "etrb"                // Immutable Wallet Address Prefix
+	GenesisBits        uint32 = 0x1e0ffff0            // Compact difficulty bits representation
 
 	// Proof-of-Work Target Parameters
-	PowTargetTimespan   int64  = 2 * 24 * 60 * 60 
-	PowTargetSpacing    int64  = 35               
-	TargetBlockTimeSec  int64  = PowTargetSpacing 
+	PowTargetTimespan   int64 = 2 * 24 * 60 * 60  
+	PowTargetSpacing    int64 = 35                 
+	TargetBlockTimeSec  int64 = PowTargetSpacing   
 
 	// ExpectedGenesisHash stores the immutable cryptographic hash checkpoint.
 	// Jika MaxSupply atau BlockReward diubah, hash ini wajib disesuaikan atau node akan menolak rantai.
-	ExpectedGenesisHash string = "0000020d84c86eea5b73612b402070523b7634b313d9c62db471a5660d42e598"
+	ExpectedGenesisHash string = "00000871a671dd6dcdedf7dc63eb1afae297197bd0309845ccb6b3bb0676222d"
 )
 
 // HardcodedCheckpoints stores trusted historical checkpoints.
