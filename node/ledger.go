@@ -30,8 +30,8 @@ import (
 	"eterbit/storage"
 )
 
-// Hardcoded Genesis Hash checkpoint linked directly to the immutable consensus specifications.
-const HardcodedGenesisHash = "00000d7459efbb41ee2c55b66e476983c19f09d21a29023fb1f7ab245b07b580"
+// Hardcoded Genesis Hash checkpoint updated with the correct hash from the miner run.
+const HardcodedGenesisHash = "000000527ca66150940beae29697611f0bb58697e71dade4c94a820ab7d06353"
 
 // AccountState represents the account balance and transaction sequence nonce.
 type AccountState struct {
@@ -229,17 +229,16 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 	}
 }
 
+// --- GENESIS HARDCODED CONSENSUS PARAMETERS ---
+const genesisTimestamp int64 = 1770249600 // Fixed static timestamp for strict deterministic genesis hash consistency
+const genesisNonce uint64 = 0             // Fixed static nonce for genesis block
+const pszTimestamp = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
+// ---------------------------------------------
+
 // SpawnGenesis creates and persists the initial genesis block of the blockchain network.
 func (lc *LedgerCore) SpawnGenesis() {
 	// Compute the base block reward allocation specifically designated for block index zero.
 	exactReward := CalculateBlockReward(0)
-	
-	// --- GENESIS HARDCODED CONSENSUS PARAMETERS ---
-	pszTimestamp := "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
-	
-	const genesisTimestamp int64 = 1770249600 // Fixed static timestamp for strict deterministic genesis hash consistency
-	const genesisNonce uint64 = 0             // Fixed static nonce for genesis block
-	// ---------------------------------------------
 
 	genesis := &core.LedgerBlock{
 		Index:      0,
@@ -263,6 +262,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 	lc.Storage.SaveBlock(0, genesis)
 	
 	fmt.Printf("[GENESIS] Block 0 Created with message: '%s'\n", pszTimestamp)
+	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d\n", genesisTimestamp, genesisNonce, genesis.Bits)
 }
 
 // AddToMempool validates and inserts a transaction payload into the pending mempool queue with Fee Market priority sorting.
