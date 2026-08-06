@@ -119,12 +119,6 @@ func InitializeLedger(dbPath string, initialDifficulty uint32, minerAddr string)
 	return coreLedger
 }
 
-const (
-	genesisTimestamp int64  = 1770249600
-	genesisBits      uint32 = 504365040
-	pszTimestamp            = "anjayyy"
-)
-
 // LoadFromDisk loads existing blockchain blocks from disk storage, validates consensus parameters dynamically, and rebuilds state.
 func (lc *LedgerCore) LoadFromDisk() bool {
 	lastIdx, exists := lc.Storage.GetLastIndex()
@@ -146,6 +140,13 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 
 	if len(lc.Chain) > 0 {
 		storedGenesis := lc.Chain[0]
+
+		// Dynamic Consensus Check constants matching SpawnGenesis
+		const (
+			genesisTimestamp int64  = 1770249600
+			genesisBits      uint32 = 504365040
+			pszTimestamp            = "anjayyy"
+		)
 
 		// Dynamic Consensus Integrity Check: If genesis parameters change in code, auto-mine a brand new genesis and reset storage seamlessly!
 		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits {
@@ -209,6 +210,12 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 
 // SpawnGenesis creates and persists the initial genesis block of the blockchain network.
 func (lc *LedgerCore) SpawnGenesis() {
+	const (
+		genesisTimestamp int64  = 1770249600
+		genesisBits      uint32 = 504365040
+		pszTimestamp            = "anjayyy"
+	)
+
 	exactReward := CalculateBlockReward(0)
 
 	genesis := &core.LedgerBlock{
