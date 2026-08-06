@@ -247,7 +247,7 @@ func (lc *LedgerCore) SpawnGenesis() {
 		PrevHash:   make([]byte, 64), // 64 bytes to align fully with SHA3-512 standards
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
-		Nonce:      0,                // Diset mulai dari 0, dicari otomatis oleh engine Mine()
+		Nonce:      0,                // Initialized to 0, automatically discovered by the Mine() engine
 		Difficulty: lc.Engine.TargetDifficulty,
 		Bits:       lc.Engine.Bits,   // Dynamic consensus engine nBits / target bits
 		Reward:     exactReward,
@@ -255,8 +255,9 @@ func (lc *LedgerCore) SpawnGenesis() {
 	}
 	
 	// Execute the consensus mining algorithm to solve the genesis block proof-of-work puzzle.
-	foundNonce, genesis.Hash := lc.Engine.Mine(genesis)
+	foundNonce, foundHash := lc.Engine.Mine(genesis)
 	genesis.Nonce = foundNonce
+	genesis.Hash = foundHash
 	genesis.Reward = exactReward // Protect the genesis reward value against external modifications.
 
 	// Append the newly minted genesis block to the local chain array and persist it to storage.
