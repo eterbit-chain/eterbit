@@ -231,8 +231,10 @@ func (lc *LedgerCore) RebuildState(block *core.LedgerBlock) {
 
 // --- DYNAMIC CONSENSUS-ALIGNED GENESIS PARAMETERS ---
 const (
-	genesisTimestamp int64 = 1770249600 // Synchronized genesis timestamp
-	pszTimestamp           = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
+	genesisTimestamp int64  = 1770249600 // Synchronized genesis timestamp
+	genesisNonce     uint64 = 178034     // Hardcoded exact nonce to maintain deterministic genesis hash
+	genesisBits      uint32 = 504365040  // Hardcoded nBits target bits
+	pszTimestamp            = "IND Today 05/Aug/2026 Aldianokto, While banks keep printing Debt, We build an honest Exit"
 )
 // ----------------------------------------------------
 
@@ -241,31 +243,32 @@ func (lc *LedgerCore) SpawnGenesis() {
 	// Compute the base block reward allocation specifically designated for block index zero.
 	exactReward := CalculateBlockReward(0)
 
+	// Decode the hardcoded constant genesis hash from hex string format to byte slice.
+	genesisHashBytes, err := hex.DecodeString(HardcodedGenesisHash)
+	if err != nil {
+		panic(fmt.Sprintf("[FATAL GENESIS ERROR] Failed to decode hardcoded genesis hash: %v", err))
+	}
+
 	genesis := &core.LedgerBlock{
 		Index:      0,
 		Timestamp:  genesisTimestamp,
 		PrevHash:   make([]byte, 64), // 64 bytes to align fully with SHA3-512 standards
 		Transfers:  []*core.Transfer{},
 		Miner:      "SYSTEM_GENESIS",
-		Nonce:      0,                // Initialized to 0, automatically discovered by the Mine() engine
+		Nonce:      genesisNonce,             // Hardcoded nonce for deterministic validation consistency
 		Difficulty: lc.Engine.TargetDifficulty,
-		Bits:       lc.Engine.Bits,   // Dynamic consensus engine nBits / target bits
+		Bits:       genesisBits,              // Hardcoded nBits / target bits matching the checkpoint
 		Reward:     exactReward,
-		Message:    pszTimestamp,     // Embed genesis message string here
+		Message:    pszTimestamp,             // Embed genesis message string here
+		Hash:       genesisHashBytes,         // Enforce locked immutable genesis hash
 	}
-	
-	// Execute the consensus mining algorithm to solve the genesis block proof-of-work puzzle.
-	foundNonce, foundHash := lc.Engine.Mine(genesis)
-	genesis.Nonce = foundNonce
-	genesis.Hash = foundHash
-	genesis.Reward = exactReward // Protect the genesis reward value against external modifications.
 
 	// Append the newly minted genesis block to the local chain array and persist it to storage.
 	lc.Chain = append(lc.Chain, genesis)
 	lc.Storage.SaveBlock(0, genesis)
 	
-	fmt.Printf("[GENESIS] Block 0 Created with message: '%s'\n", pszTimestamp)
-	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce Found: %d | Bits: %d | Hash: %x\n", genesisTimestamp, genesis.Nonce, genesis.Bits, genesis.Hash)
+	fmt.Printf("[GENESIS] Block 0 Loaded/Spawned with message: '%s'\n", pszTimestamp)
+	fmt.Printf("[GENESIS PARAMS] Timestamp: %d | Nonce: %d | Bits: %d | Hash: %x\n", genesisTimestamp, genesis.Nonce, genesis.Bits, genesis.Hash)
 }
 
 // AddToMempool validates and inserts a transaction payload into the pending mempool queue with Fee Market priority sorting.
