@@ -150,10 +150,10 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 		// Dynamic Consensus Integrity Check: If genesis parameters change in code, auto-mine a brand new genesis and reset storage seamlessly!
 		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits {
 			fmt.Println("\n================================================================================")
-			fmt.Println("[CONENSUS EVENT] Genesis parameters modified in code! Triggering Sovereign Hard Fork...")
+			fmt.Println("[CONSENSUS EVENT] Genesis parameters modified in code! Triggering Sovereign Hard Fork...")
 			fmt.Printf("OLD GENESIS -> Message: '%s' | Timestamp: %d | Bits: %d\n", storedGenesis.Message, storedGenesis.Timestamp, storedGenesis.Bits)
 			fmt.Printf("NEW GENESIS -> Message: '%s' | Timestamp: %d | Bits: %d\n", pszTimestamp, genesisTimestamp, genesisBits)
-			fmt.Println("[CONENSUS EVENT] Automatically re-mining genesis block and resetting chain state...")
+			fmt.Println("[CONSENSUS EVENT] Automatically re-mining genesis block and resetting chain state...")
 			fmt.Println("================================================================================")
 
 			// Clear stored chain and reset storage database completely
