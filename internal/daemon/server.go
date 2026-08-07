@@ -45,13 +45,16 @@ func RunNodeDaemon(port string, connectPeer string) {
 
 	// Load configuration settings from eterbit.conf if available.
 	cfg, err := internal.LoadConfig(dataDir)
-	if err != nil {
-		fmt.Println("[SYS] Warning: Failed to load configuration settings, using defaults.")
+	rpcPort := "19332"
+	if err != nil || cfg == nil {
+		fmt.Println("[SYS] Warning: Failed to load configuration settings, using default RPC port 19332.")
+	} else if cfg.RPCPort != "" {
+		rpcPort = cfg.RPCPort
 	}
 
 	// Override port with configuration file setting if default port is used.
 	serverPort := port
-	if serverPort == ":19333" && cfg.Port != ":19333" {
+	if serverPort == ":19333" && cfg != nil && cfg.Port != ":19333" {
 		serverPort = cfg.Port
 	}
 
@@ -59,7 +62,7 @@ func RunNodeDaemon(port string, connectPeer string) {
 	server := p2p.NewServer(serverPort)
 
 	// Start the JSON-RPC server with authentication using settings from eterbit.conf.
-	rpc.StartRPCServer(cfg.RPCPort, ledger, cfg)
+	rpc.StartRPCServer(rpcPort, ledger, cfg)
 
 	// Initialize the block reorganization manager.
 	reorgManager := internal.NewBlockReorgManager()
