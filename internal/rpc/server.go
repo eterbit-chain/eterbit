@@ -16,9 +16,12 @@
 package rpc
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"eterbit/internal"
 	"eterbit/node"
 )
 
@@ -37,11 +40,21 @@ type RPCResponse struct {
 	ID     interface{} `json:"id"`
 }
 
-// StartRPCServer starts the JSON-RPC HTTP server on the specified port.
-func StartRPCServer(rpcPort string, ledger *node.Ledger) {
+// StartRPCServer starts the JSON-RPC HTTP server with Basic Authentication on the specified port.
+func StartRPCServer(rpcPort string, ledger *node.Ledger, cfg *internal.Config) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Validate HTTP Basic Authentication credentials against configuration settings using constant-time comparison.
+		user, pass, ok := r.BasicAuth()
+		if !ok || cfg == nil || 
+			subtle.ConstantTimeCompare([]byte(user), []byte(cfg.RPCUser)) != 1 || 
+			subtle.ConstantTimeCompare([]byte(pass), []byte(cfg.RPCPassword)) != 1 {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Eterbit RPC"`)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -94,7 +107,7 @@ func StartRPCServer(rpcPort string, ledger *node.Ledger) {
 	})
 
 	addr := fmt.Sprintf(":%s", rpcPort)
-	fmt.Printf("[RPC] JSON-RPC server listening on port %s\n", rpcPort)
+	fmt.Printf("[RPC] JSON-RPC server listening (Auth Enabled) on port %s\n", rpcPort)
 	go func() {
 		if err := http.ListenAndServe(addr, mux); err != nil {
 			fmt.Printf("[RPC] Server error: %v\n", err)

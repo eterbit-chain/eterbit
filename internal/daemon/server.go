@@ -18,6 +18,7 @@ import (
 	"eterbit/internal/cli"
 	"eterbit/internal/consensus"
 	"eterbit/internal/p2p"
+	"eterbit/internal/rpc"
 	"eterbit/node"
 	"eterbit/storage/wallet"
 )
@@ -56,6 +57,9 @@ func RunNodeDaemon(port string, connectPeer string) {
 
 	ledger := node.InitializeLedger(dataDir, 3, addrMiner)
 	server := p2p.NewServer(serverPort)
+
+	// Start the JSON-RPC server using settings from eterbit.conf.
+	rpc.StartRPCServer(cfg.RPCPort, ledger)
 
 	// Initialize the block reorganization manager.
 	reorgManager := internal.NewBlockReorgManager()
