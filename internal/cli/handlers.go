@@ -110,7 +110,7 @@ func HandleCheckSupply() {
 	circulatingSupply := totalBlocks * rewardPerBlock
 
 	fmt.Println("================================================================================")
-	fmt.Println("                     ETERBIT COIN SUPPLY STATISTICS                             ")
+	fmt.Println("                         ETERBIT COIN SUPPLY STATISTICS                         ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Max Supply         : %.8f Coins\n", node.ToDecimal(maxSupply))
 	fmt.Printf(" Circulating Supply : %.8f Coins\n", node.ToDecimal(circulatingSupply))
@@ -190,7 +190,7 @@ func HandleAddNode(peerAddr string) {
 		if len(os.Args) > 2 {
 			peerAddr = os.Args[2]
 		} else {
-			fmt.Println("[CLI] Error: Target peer address is required. Usage: go run eterbit.go addnode <host:port>")
+			fmt.Println("[CLI] Error: Target peer address is required. Usage: ./eterbit addnode <host:port>")
 			return
 		}
 	}
@@ -298,7 +298,7 @@ func HandleCheckFees() {
 
 	count, highest, avg := ledger.GetMempoolFeeStats()
 	fmt.Println("================================================================================")
-	fmt.Println("                        ETERBIT MEMPOOL FEE MARKET                              ")
+	fmt.Println("                         ETERBIT MEMPOOL FEE MARKET                             ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Pending Transactions in Mempool : %d\n", count)
 	fmt.Printf(" Highest Priority Fee          : %.8f Coins\n", node.ToDecimal(highest))
@@ -433,7 +433,7 @@ func HandleRPCClient(method string, params []interface{}) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("[CLI] Error connecting to Eterbit daemon at %s: %v\n", rpcURL, err)
-		fmt.Println("[CLI] Make sure 'eterbitd' daemon is running!")
+		fmt.Println("[CLI] Make sure 'eterbit' daemon is running!")
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
