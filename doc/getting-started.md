@@ -50,7 +50,7 @@ To connect your node to other peers on the network or check network statistics, 
 ./eterbit peers
 ```
 
-## Checking Supply and Uptime
+## Checking Supply. Uptime. blockchain size
 You can monitor your node's operational health and token metrics at any time using:
 
 ```bash
@@ -59,3 +59,7 @@ You can monitor your node's operational health and token metrics at any time usi
 
 # Check circulating supply and remaining coins to be mined
 ./eterbit supply
+
+# View total blockchain storage size and location
+./eterbit blocksize
+```
