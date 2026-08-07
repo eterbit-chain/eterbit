@@ -1,4 +1,4 @@
-# Getting Started with Eterbit Core
+# Getting Started with Xcosh Core
 
 Follow this guide to set up your development environment, compile the binary, and run your first Eterbit node.
 
@@ -11,7 +11,7 @@ Clone the repository to your local machine and compile the source code:
 
 ```bash
 git clone https://github.com/eterbit-chain/eterbit.git
-cd eterbit
+cd xcosh
 go build -o xcosh xcosh.go
 ```
 
