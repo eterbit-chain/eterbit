@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"reflect"
 	"time"
 
@@ -94,6 +95,53 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 			// Return the active peer connection count.
 			response.Result = 1
 
+		case "getbestblockhash":
+			// Retrieve the hash of the latest block in the chain dynamically.
+			bestHash := ""
+			if v.IsValid() && v.Kind() == reflect.Struct {
+				chainField := v.FieldByName("Chain")
+				if chainField.IsValid() && chainField.Len() > 0 {
+					latestBlock := chainField.Index(chainField.Len() - 1)
+					if latestBlock.Kind() == reflect.Ptr {
+						latestBlock = latestBlock.Elem()
+					}
+					hashField := latestBlock.FieldByName("Hash")
+					if hashField.IsValid() && hashField.Kind() == reflect.String {
+						bestHash = hashField.String()
+					}
+				}
+			}
+			response.Result = bestHash
+
+		case "getmininginfo":
+			// Retrieve real-time mining and difficulty metrics.
+			blocks := 0
+			difficulty := 0.0
+			if v.IsValid() && v.Kind() == reflect.Struct {
+				chainField := v.FieldByName("Chain")
+				if chainField.IsValid() {
+					blocks = chainField.Len()
+					if blocks > 0 {
+						latestBlock := chainField.Index(blocks - 1)
+						if latestBlock.Kind() == reflect.Ptr {
+							latestBlock = latestBlock.Elem()
+						}
+						diffField := latestBlock.FieldByName("Difficulty")
+						if diffField.IsValid() {
+							difficulty = diffField.Float()
+						}
+					}
+				}
+			}
+			response.Result = map[string]interface{}{
+				"blocks":        blocks,
+				"difficulty":    difficulty,
+				"networkhashps": 0,
+				"pooledtx":      0,
+				"testnet":       false,
+				"chain":         "main",
+			}
+
 		case "getinfo":
 			// Gather comprehensive real-time node metrics mimicking Bitcoin Core getinfo output.
 			blocks := 0
@@ -160,6 +208,14 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 				"relayfee":        0.00000010,
 				"errors":          "",
 			}
+
+		case "stop":
+			// Gracefully stop the RPC server and node daemon.
+			response.Result = "Eterbit server stopping..."
+			go func() {
+				time.Sleep(1 * time.Second)
+				os.Exit(0)
+			}()
 
 		default:
 			// Handle unknown or unsupported RPC method calls.
