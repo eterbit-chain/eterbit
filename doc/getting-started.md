@@ -13,6 +13,7 @@ Clone the repository to your local machine and compile the source code:
 git clone [https://github.com/eterbit-chain/eterbit.git
 cd eterbit
 go build -o eterbit eterbit.go
+```
 
 ## 2. Managing Wallets & Accounts
 Before interacting with the ledger or mining coins, create your local cryptographic account profile:
