@@ -58,8 +58,8 @@ func RunNodeDaemon(port string, connectPeer string) {
 	ledger := node.InitializeLedger(dataDir, 3, addrMiner)
 	server := p2p.NewServer(serverPort)
 
-	// Start the JSON-RPC server using settings from eterbit.conf.
-	rpc.StartRPCServer(cfg.RPCPort, ledger)
+	// Start the JSON-RPC server with authentication using settings from eterbit.conf.
+	rpc.StartRPCServer(cfg.RPCPort, ledger, cfg)
 
 	// Initialize the block reorganization manager.
 	reorgManager := internal.NewBlockReorgManager()
