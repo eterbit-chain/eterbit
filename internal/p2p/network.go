@@ -54,7 +54,9 @@ type Server struct {
 func getDataDirInternal() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "eterbit_data"
+		dir := filepath.Join(".", ".eterbit")
+		os.MkdirAll(dir, 0755)
+		return dir
 	}
 	dir := filepath.Join(homeDir, ".eterbit")
 	os.MkdirAll(dir, 0755)
