@@ -5,7 +5,7 @@
 // Project: Eterbit / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
+// You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -27,13 +28,32 @@ type UptimeRecord struct {
 	StartTime int64 `json:"start_time"`
 }
 
-var UptimeFile = "eterbit_data/uptime.json"
+// getEterbitDir resolves and returns the path to the ~/.eterbit directory safely.
+func getEterbitDir() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "eterbit_data" // Fallback to local directory if home is inaccessible
+	}
+	return filepath.Join(homeDir, ".eterbit")
+}
+
+// getUptimeFilePath returns the full absolute path for the uptime tracking JSON file.
+func getUptimeFilePath() string {
+	dir := getEterbitDir()
+	os.MkdirAll(dir, 0755)
+	return filepath.Join(dir, "uptime.json")
+}
+
+var UptimeFile = getUptimeFilePath()
 
 // RecordStartTime is invoked during node boot initialization to record the startup timestamp.
 func RecordStartTime() {
 	// Ensure that the target directory structure exists prior to file persistence operations.
-	os.MkdirAll("eterbit_data", 0755)
+	os.MkdirAll(getEterbitDir(), 0755)
 	
+	// Re-evaluate UptimeFile path in case it changed or initialized dynamically.
+	UptimeFile = getUptimeFilePath()
+
 	// If the uptime file already exists (meaning the node may already be running), do not overwrite unless newly restarted.
 	if _, err := os.Stat(UptimeFile); os.IsNotExist(err) {
 		record := UptimeRecord{
@@ -46,6 +66,8 @@ func RecordStartTime() {
 
 // GetUptime computes how long the node has been active (in seconds, minutes, hours, days) similar to dogecoin-cli uptime.
 func GetUptime() (int64, string) {
+	UptimeFile = getUptimeFilePath()
+
 	// Read the serialized uptime record from disk storage.
 	data, err := os.ReadFile(UptimeFile)
 	if err != nil {
@@ -53,7 +75,7 @@ func GetUptime() (int64, string) {
 		StartTime := time.Now().Unix()
 		record := UptimeRecord{StartTime: StartTime}
 		newData, _ := json.MarshalIndent(record, "", "  ")
-		os.MkdirAll("eterbit_data", 0755)
+		os.MkdirAll(getEterbitDir(), 0755)
 		os.WriteFile(UptimeFile, newData, 0644)
 		return 0, "0 seconds"
 	}
