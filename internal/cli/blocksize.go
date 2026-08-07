@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"eterbit/internal"
+	"xcosh/internal"
 )
 
 // HandleCheckBlockSize retrieves and prints the physical storage size of the blockchain database.
@@ -29,7 +29,7 @@ func HandleCheckBlockSize() {
 		fmt.Printf("[ERROR] Failed to get user home directory: %v\n", err)
 		return
 	}
-	dbPath := filepath.Join(homeDir, ".eterbit")
+	dbPath := filepath.Join(homeDir, ".xcosh")
 
 	sizeBytes, err := internal.GetBlockChainStorageSize(dbPath)
 	if err != nil {
@@ -39,7 +39,7 @@ func HandleCheckBlockSize() {
 
 	sizeMB := float64(sizeBytes) / (1024 * 1024)
 	fmt.Println("================================================================================")
-	fmt.Println(" ETERBIT BLOCKCHAIN STORAGE SIZE")
+	fmt.Println(" XCOSH BLOCKCHAIN STORAGE SIZE")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Physical Path : %s\n", dbPath)
 	fmt.Printf(" Size in Bytes : %d bytes\n", sizeBytes)

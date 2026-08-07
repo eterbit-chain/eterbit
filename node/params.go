@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
@@ -15,9 +15,9 @@
 
 package node
 
-// Financial and decimal parameter constants for Eterbit (8 decimal precision).
+// Financial and decimal parameter constants for Xcosh (8 decimal precision).
 const (
-	CoinUnit       = 100000000 // 1 Eterbit = 100,000,000 smallest units
+	CoinUnit       = 100000000 // 1 Xcosh = 100,000,000 smallest units
 	InitialAirdrop = 10000 * CoinUnit
 )
 

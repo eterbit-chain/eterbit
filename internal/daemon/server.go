@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 
 package daemon
 
@@ -13,20 +13,20 @@ import (
 	"path/filepath"
 	"time"
 
-	"eterbit/core"
-	"eterbit/internal"
-	"eterbit/internal/cli"
-	"eterbit/internal/consensus"
-	"eterbit/internal/p2p"
-	"eterbit/internal/rpc"
-	"eterbit/node"
-	"eterbit/storage/wallet"
+	"xcosh/core"
+	"xcosh/internal"
+	"xcosh/internal/cli"
+	"xcosh/internal/consensus"
+	"xcosh/internal/p2p"
+	"xcosh/internal/rpc"
+	"xcosh/node"
+	"xcosh/storage/wallet"
 )
 
 // RunNodeDaemon initiates the continuous background validation daemon process,
 // acting as the primary P2P node runner.
 func RunNodeDaemon(port string, connectPeer string) {
-	fmt.Println("[SYS] Booting Eterbit Live Node Daemon (Bitcoin Core Style)...")
+	fmt.Println("[SYS] Booting Xcosh Live Node Daemon (Bitcoin Core Style)...")
 	
 	// Record the system startup timestamp for precise uptime tracking functionality.
 	internal.RecordStartTime()
@@ -43,7 +43,7 @@ func RunNodeDaemon(port string, connectPeer string) {
 	// Initialize database storage directory and state ledger contexts.
 	dataDir := cli.GetDataDir()
 
-	// Load configuration settings from eterbit.conf if available.
+	// Load configuration settings from xcosh.conf if available.
 	cfg, err := internal.LoadConfig(dataDir)
 	rpcPort := "19332"
 	if err != nil || cfg == nil {
@@ -61,7 +61,7 @@ func RunNodeDaemon(port string, connectPeer string) {
 	ledger := node.InitializeLedger(dataDir, 3, addrMiner)
 	server := p2p.NewServer(serverPort)
 
-	// Start the JSON-RPC server with authentication using settings from eterbit.conf.
+	// Start the JSON-RPC server with authentication using settings from xcosh.conf.
 	rpc.StartRPCServer(rpcPort, ledger, cfg)
 
 	// Initialize the block reorganization manager.

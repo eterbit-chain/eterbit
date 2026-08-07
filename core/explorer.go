@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"eterbit/internal/consensus"
+	"xcosh/internal/consensus"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -39,7 +39,7 @@ type BlockRecord struct {
 // InspectBlockchain opens the LevelDB storage directly and inspects committed states and blocks.
 func InspectBlockchain(dataDir string) {
 	fmt.Println("================================================================================")
-	fmt.Println(" ETERBIT BLOCKCHAIN EXPLORER (LEVELDB)")
+	fmt.Println(" XCOSH BLOCKCHAIN EXPLORER (LEVELDB)")
 	fmt.Println("================================================================================")
 
 	// Open the LevelDB database instance from the specified data directory path.

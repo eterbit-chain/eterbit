@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -27,22 +27,22 @@ import (
 	"path/filepath"
 	"time"
 
-	"eterbit/core"
-	"eterbit/internal"
-	"eterbit/internal/consensus"
-	"eterbit/internal/p2p"
-	"eterbit/node"
-	"eterbit/storage/wallet"
+	"xcosh/core"
+	"xcosh/internal"
+	"xcosh/internal/consensus"
+	"xcosh/internal/p2p"
+	"xcosh/node"
+	"xcosh/storage/wallet"
 )
 
-// GetDataDir returns the external global data directory (~/.eterbit) so that blockchain data
+// GetDataDir returns the external global data directory (~/.xcosh) so that blockchain data
 // and wallet configurations remain safe even if the source repository folder is modified or removed.
 func GetDataDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "eterbit_data" // Fallback directory if home path is inaccessible.
+		return "xcosh_data" // Fallback directory if home path is inaccessible.
 	}
-	dir := filepath.Join(homeDir, ".eterbit")
+	dir := filepath.Join(homeDir, ".xcosh")
 	os.MkdirAll(dir, 0755)
 	return dir
 }
@@ -75,7 +75,7 @@ func HandleCreateWalletAccount(label string) {
 		return
 	}
 	fmt.Println("================================================================================")
-	fmt.Println(" ETERBIT NEW WALLET ACCOUNT CREATED (WALLET.DAT)")
+	fmt.Println(" XCOSH NEW WALLET ACCOUNT CREATED (WALLET.DAT)")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Filepath : %s\n", filePath)
 	fmt.Printf(" Label    : %s\n", label)
@@ -110,7 +110,7 @@ func HandleCheckSupply() {
 	circulatingSupply := totalBlocks * rewardPerBlock
 
 	fmt.Println("================================================================================")
-	fmt.Println("                         ETERBIT COIN SUPPLY STATISTICS                         ")
+	fmt.Println("                         XCOSH COIN SUPPLY STATISTICS                         ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Max Supply         : %.8f Coins\n", node.ToDecimal(maxSupply))
 	fmt.Printf(" Circulating Supply : %.8f Coins\n", node.ToDecimal(circulatingSupply))
@@ -190,7 +190,7 @@ func HandleAddNode(peerAddr string) {
 		if len(os.Args) > 2 {
 			peerAddr = os.Args[2]
 		} else {
-			fmt.Println("[CLI] Error: Target peer address is required. Usage: ./eterbit addnode <host:port>")
+			fmt.Println("[CLI] Error: Target peer address is required. Usage: ./xcosh addnode <host:port>")
 			return
 		}
 	}
@@ -209,7 +209,7 @@ func HandleAddNode(peerAddr string) {
 	am.AddAddress(host, port)
 
 	fmt.Println("================================================================================")
-	fmt.Println(" ETERBIT P2P NETWORK - ADDNODE MANUAL REGISTRATION")
+	fmt.Println(" XCOSH P2P NETWORK - ADDNODE MANUAL REGISTRATION")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Successfully added peer to addrman database: %s:%d\n", host, port)
 	fmt.Printf(" Persisted to : %s/peers_addrman.json\n", dataDir)
@@ -255,7 +255,7 @@ func HandleExploreBlockchain() {
 // HandleCheckPeers displays the active connected peers list.
 func HandleCheckPeers() {
 	fmt.Println("================================================================================")
-	fmt.Println(" ETERBIT P2P NETWORK - PEER INFO")
+	fmt.Println(" XCOSH P2P NETWORK - PEER INFO")
 	fmt.Println("================================================================================")
 	filePath := filepath.Join(GetDataDir(), "peers.json")
 	data, err := os.ReadFile(filePath)
@@ -298,7 +298,7 @@ func HandleCheckFees() {
 
 	count, highest, avg := ledger.GetMempoolFeeStats()
 	fmt.Println("================================================================================")
-	fmt.Println("                         ETERBIT MEMPOOL FEE MARKET                             ")
+	fmt.Println("                         XCOSH MEMPOOL FEE MARKET                             ")
 	fmt.Println("================================================================================")
 	fmt.Printf(" Pending Transactions in Mempool : %d\n", count)
 	fmt.Printf(" Highest Priority Fee          : %.8f Coins\n", node.ToDecimal(highest))
@@ -310,7 +310,7 @@ func HandleCheckFees() {
 func HandleCheckUptime() {
 	_, uptimeFormatted := internal.GetUptime()
 	fmt.Println("================================================================")
-	fmt.Println("                  ETERBIT NODE UPTIME INFO                      ")
+	fmt.Println("                  XCOSH NODE UPTIME INFO                      ")
 	fmt.Println("================================================================")
 	fmt.Printf(" Uptime: %s\n", uptimeFormatted)
 	fmt.Println("================================================================")
@@ -363,7 +363,7 @@ func HandleGetBlock(targetHash string) {
 		return
 	}
 	fmt.Println("================================================================")
-	fmt.Println("                 ETERBIT BLOCK JSON DATA                        ")
+	fmt.Println("                 XCOSH BLOCK JSON DATA                        ")
 	fmt.Println("================================================================")
 	fmt.Println(string(jsonData))
 	fmt.Println("================================================================")
@@ -432,14 +432,14 @@ func HandleRPCClient(method string, params []interface{}) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("[CLI] Error connecting to Eterbit daemon at %s: %v\n", rpcURL, err)
-		fmt.Println("[CLI] Make sure 'eterbit' daemon is running!")
+		fmt.Printf("[CLI] Error connecting to Xcosh daemon at %s: %v\n", rpcURL, err)
+		fmt.Println("[CLI] Make sure 'xcosh' daemon is running!")
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		fmt.Println("[CLI] Error: Unauthorized. Check your rpcuser and rpcpassword in eterbit.conf")
+		fmt.Println("[CLI] Error: Unauthorized. Check your rpcuser and rpcpassword in xcosh.conf")
 		os.Exit(1)
 	}
 

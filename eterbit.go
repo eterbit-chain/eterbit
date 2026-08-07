@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -21,8 +21,8 @@ import (
 	"os"
 	"strconv"
 
-	"eterbit/internal/cli"
-	"eterbit/internal/daemon"
+	"xcosh/internal/cli"
+	"xcosh/internal/daemon"
 
 	_ "github.com/cloudflare/circl/sign/dilithium/mode3"
 )
@@ -104,14 +104,14 @@ func main() {
 		cli.HandleManualMine(*mineBlocks, *mineAddress)
 	case "mining":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: ./eterbit mining <target_address>")
+			fmt.Println("Usage: ./xcosh mining <target_address>")
 			os.Exit(1)
 		}
 		miningCmd.Parse(os.Args[3:])
 		cli.HandleManualMine(1, os.Args[2])
 	case "addnode":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: ./eterbit addnode <host:port>")
+			fmt.Println("Usage: ./xcosh addnode <host:port>")
 			os.Exit(1)
 		}
 		addNodeCmd.Parse(os.Args[2:])
@@ -133,14 +133,14 @@ func main() {
 		cli.HandleCheckBlockSize()
 	case "getblockhash":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: ./eterbit getblockhash <block_index>")
+			fmt.Println("Usage: ./xcosh getblockhash <block_index>")
 			os.Exit(1)
 		}
 		getBlockHashCmd.Parse(os.Args[2:])
 		cli.HandleGetBlockHash(os.Args[2])
 	case "getblock":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: ./eterbit getblock <block_hash>")
+			fmt.Println("Usage: ./xcosh getblock <block_hash>")
 			os.Exit(1)
 		}
 		getBlockCmd.Parse(os.Args[2:])
@@ -159,27 +159,27 @@ func main() {
 // printUsage outputs the standard command-line manual instructions and available command options to standard output.
 func printUsage() {
 	fmt.Println("================================================================================")
-	fmt.Println(" ETERBIT BLOCKCHAIN CLI MANAGER (MULTI-WALLET ARCHITECTURE)")
+	fmt.Println(" XCOSH BLOCKCHAIN CLI MANAGER (MULTI-WALLET ARCHITECTURE)")
 	fmt.Println("================================================================================")
 	fmt.Println("Available commands:")
-	fmt.Println("  ./eterbit create [-label <account_label>]")
-	fmt.Println("  ./eterbit balance")
-	fmt.Println("  ./eterbit supply")
-	fmt.Println("  ./eterbit send -to <addr> -amount <val> [-fee <val>] [-from <sender_addr>]")
-	fmt.Println("  ./eterbit node [--port :port] [--connect host:port]")
-	fmt.Println("  ./eterbit addnode <host:port>")
-	fmt.Println("  ./eterbit mine [-blocks <num>] [-address <addr>]")
-	fmt.Println("  ./eterbit mining <target_address>")
-	fmt.Println("  ./eterbit explorer")
-	fmt.Println("  ./eterbit peers")
-	fmt.Println("  ./eterbit fees")
-	fmt.Println("  ./eterbit uptime")
-	fmt.Println("  ./eterbit getnettotals")
-	fmt.Println("  ./eterbit blocksize")
-	fmt.Println("  ./eterbit getblockhash <index>")
-	fmt.Println("  ./eterbit getblock <hash>")
-	fmt.Println("  ./eterbit getblockcount (RPC)")
-	fmt.Println("  ./eterbit getinfo (RPC)")
-	fmt.Println("  ./eterbit getconnectioncount (RPC)")
+	fmt.Println("  ./xcosh create [-label <account_label>]")
+	fmt.Println("  ./xcosh balance")
+	fmt.Println("  ./xcosh supply")
+	fmt.Println("  ./xcosh send -to <addr> -amount <val> [-fee <val>] [-from <sender_addr>]")
+	fmt.Println("  ./xcosh node [--port :port] [--connect host:port]")
+	fmt.Println("  ./xcosh addnode <host:port>")
+	fmt.Println("  ./xcosh mine [-blocks <num>] [-address <addr>]")
+	fmt.Println("  ./xcosh mining <target_address>")
+	fmt.Println("  ./xcosh explorer")
+	fmt.Println("  ./xcosh peers")
+	fmt.Println("  ./xcosh fees")
+	fmt.Println("  ./xcosh uptime")
+	fmt.Println("  ./xcosh getnettotals")
+	fmt.Println("  ./xcosh blocksize")
+	fmt.Println("  ./xcosh getblockhash <index>")
+	fmt.Println("  ./xcosh getblock <hash>")
+	fmt.Println("  ./xcosh getblockcount (RPC)")
+	fmt.Println("  ./xcosh getinfo (RPC)")
+	fmt.Println("  ./xcosh getconnectioncount (RPC)")
 	fmt.Println("================================================================================")
 }

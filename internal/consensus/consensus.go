@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
@@ -34,7 +34,7 @@ const (
 	BlockReward       uint64 = 50 * CoinUnit         // Initial Minting Reward: 50 Units per Block
 	HalvingInterval   uint64 = 7850000               // Strict Halving Block Interval
 	DefaultPort       int    = 19333                 // Default P2P Network Port
-	AddressPrefix     string = "etrb"                // Immutable Wallet Address Prefix
+	AddressPrefix     string = "xcosh"                // Immutable Wallet Address Prefix
 	GenesisBits       uint32 = 0x1e0ffff0            // Compact difficulty bits representation
 	MaxBlockSizeBytes uint64 = 4 * 1024 * 1024       // Maximum Block Size Limit (4 MB for Dilithium-3 transactions)
 

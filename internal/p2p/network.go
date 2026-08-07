@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"eterbit/core"
+	"xcosh/core"
 )
 
 // MessageType defines the classification of network messages transmitted across nodes.
@@ -54,11 +54,11 @@ type Server struct {
 func getDataDirInternal() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		dir := filepath.Join(".", ".eterbit")
+		dir := filepath.Join(".", ".xcosh")
 		os.MkdirAll(dir, 0755)
 		return dir
 	}
-	dir := filepath.Join(homeDir, ".eterbit")
+	dir := filepath.Join(homeDir, ".xcosh")
 	os.MkdirAll(dir, 0755)
 	return dir
 }

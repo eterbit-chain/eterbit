@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -21,18 +21,18 @@ import (
 	"time"
 )
 
-// DefaultHardcodedSeeds defines the list of official or community-backed bootstrap seed nodes for Eterbit Core.
+// DefaultHardcodedSeeds defines the list of official or community-backed bootstrap seed nodes for Xcosh Core.
 var DefaultHardcodedSeeds = []string{
-	"seed1.eterbit.org:19333",
-	"seed2.eterbit.org:19333",
-	"fallback.eterbit.network:19333",
+	"seed1.xcosh.org:19333",
+	"seed2.xcosh.org:19333",
+	"fallback.xcosh.network:19333",
 	"127.0.0.1:19333",
 }
 
 // DnsSeedDomains defines the list of DNS seed domains for dynamic peer discovery (BIP 155 style).
 var DnsSeedDomains = []string{
-	"seed.eterbit.io",
-	"dnsseed.eterbit.org",
+	"seed.xcosh.io",
+	"dnsseed.xcosh.org",
 }
 
 // AutoDiscoverAndConnect performs automatic discovery and connection attempts to hardcoded seeds and DNS seeds.

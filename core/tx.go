@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
@@ -19,7 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"eterbit/crypto"
+	"xcosh/crypto"
 	"github.com/cloudflare/circl/sign/dilithium/mode3"
 	"golang.org/x/crypto/sha3"
 )

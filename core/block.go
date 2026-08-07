@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
@@ -22,14 +22,14 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"eterbit/internal/consensus"
+	"xcosh/internal/consensus"
 	"golang.org/x/crypto/sha3"
 )
 
 // CoinUnit defines an 8-decimal scaling factor retrieved directly from consensus parameters.
 const CoinUnit = consensus.CoinUnit
 
-const MaxEterbitSupply uint64 = consensus.MaxSupply / consensus.CoinUnit // Aligns with MaxSupply specified in internal/consensus
+const MaxXcoshSupply uint64 = consensus.MaxSupply / consensus.CoinUnit // Aligns with MaxSupply specified in internal/consensus
 
 // LedgerBlock represents the core structural block entity containing transactional ledger data, cryptographic hashes, and consensus metadata.
 type LedgerBlock struct {

@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -21,7 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"eterbit/crypto"
+	"xcosh/crypto"
 	"github.com/cloudflare/circl/sign/dilithium/mode3"
 )
 
@@ -38,16 +38,16 @@ type WalletFile struct {
 	Accounts []Account `json:"accounts"`
 }
 
-// getDataDir returns the external global data directory (~/.eterbit) so that wallet.dat 
+// getDataDir returns the external global data directory (~/.xcosh) so that wallet.dat 
 // remains completely safe even if the project source folder is deleted or updated.
 func getDataDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		dir := filepath.Join(".", ".eterbit")
+		dir := filepath.Join(".", ".xcosh")
 		os.MkdirAll(dir, 0755)
 		return dir
 	}
-	dir := filepath.Join(homeDir, ".eterbit")
+	dir := filepath.Join(homeDir, ".xcosh")
 	os.MkdirAll(dir, 0755)
 	return dir
 }
@@ -81,12 +81,12 @@ func LoadWalletCustom(filePath string) (*WalletFile, error) {
 	return &wf, nil
 }
 
-// SaveWallet serializes the multi-wallet container to the default wallet.dat file inside ~/.eterbit.
+// SaveWallet serializes the multi-wallet container to the default wallet.dat file inside ~/.xcosh.
 func SaveWallet(wf *WalletFile) error {
 	return SaveWalletCustom(filepath.Join(getDataDir(), "wallet.dat"), wf)
 }
 
-// LoadWallet attempts to read and deserialize the default localized wallet.dat file from disk storage inside ~/.eterbit.
+// LoadWallet attempts to read and deserialize the default localized wallet.dat file from disk storage inside ~/.xcosh.
 func LoadWallet() (*WalletFile, error) {
 	filePath := filepath.Join(getDataDir(), "wallet.dat")
 	return LoadWalletCustom(filePath)

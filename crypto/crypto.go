@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
@@ -18,8 +18,8 @@ package crypto
 import (
 	"encoding/hex"
 
-	"eterbit/crypto/dilithium3"
-	"eterbit/crypto/sha3"
+	"xcosh/crypto/dilithium3"
+	"xcosh/crypto/sha3"
 	"github.com/cloudflare/circl/sign/dilithium/mode3"
 	golangSha3 "golang.org/x/crypto/sha3"
 )
@@ -44,7 +44,7 @@ func Hash256(data []byte) []byte {
 // PubkeyToAddress derives a custom post-quantum network address string from a Dilithium public key bytes slice.
 func PubkeyToAddress(pubBytes []byte) string {
 	rawHex := hex.EncodeToString(pubBytes[:14])
-	return "etrb" + rawHex
+	return "xcosh" + rawHex
 }
 
 // Sign delegates signature generation to the dilithium3 module.

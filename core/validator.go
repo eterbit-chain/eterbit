@@ -1,5 +1,5 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
 
@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"strings"
 
-	"eterbit/internal/consensus"
+	"xcosh/internal/consensus"
 )
 
 // ValidateBlockConsensus rigorously evaluates incoming block structures against 

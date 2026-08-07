@@ -1,8 +1,8 @@
 // Copyright (c) 2026 AldianOkto. All rights reserved.
-// Copyright (c) 2026 Eterbit Core.
+// Copyright (c) 2026 Xcosh Core.
 // Use of this source code is governed by the Apache License.
 // that can be found in the root directory of this repository.
-// Project: Eterbit / Blockchain Core
+// Project: Xcosh / Blockchain Core
 //
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at. <http://www.apache.org/licenses/LICENSE-2.0>
@@ -24,9 +24,9 @@ import (
 	"reflect"
 	"time"
 
-	"eterbit/internal"
-	"eterbit/node"
-	"eterbit/storage/wallet"
+	"xcosh/internal"
+	"xcosh/node"
+	"xcosh/storage/wallet"
 )
 
 // RPCRequest represents the incoming JSON-RPC request structure.
@@ -54,7 +54,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 		if !ok || cfg == nil || 
 			subtle.ConstantTimeCompare([]byte(user), []byte(cfg.RPCUser)) != 1 || 
 			subtle.ConstantTimeCompare([]byte(pass), []byte(cfg.RPCPassword)) != 1 {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Eterbit RPC"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Xcosh RPC"`)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -225,7 +225,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 
 		case "stop":
 			// Gracefully stop the RPC server and node daemon.
-			response.Result = "Eterbit server stopping..."
+			response.Result = "Xcosh server stopping..."
 			go func() {
 				time.Sleep(1 * time.Second)
 				os.Exit(0)
@@ -257,5 +257,5 @@ func filepathJoinWallet(cfg *internal.Config) string {
 	if err != nil {
 		return "wallet.dat"
 	}
-	return home + "/.eterbit/wallet.dat"
+	return home + "/.xcosh/wallet.dat"
 }
