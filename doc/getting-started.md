@@ -63,3 +63,14 @@ You can monitor your node's operational health and token metrics at any time usi
 # View total blockchain storage size and location
 ./eterbit blocksize
 ```
+
+## Transactions & Fee Management
+To transfer coins to another address or monitor transaction fee statistics in the mempool, use:
+
+```bash
+# Send coins to another address with an optional fee and custom sender address
+./eterbit send -to <recipient_address> -amount <val> -fee <val> -from <sender_address>
+
+# Analyze fee market statistics derived from the active mempool
+./eterbit fees
+```
