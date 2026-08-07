@@ -114,7 +114,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 			response.Result = bestHash
 
 		case "getmininginfo":
-			// Retrieve real-time mining and difficulty metrics.
+			// Retrieve real-time mining and difficulty metrics safely.
 			blocks := 0
 			difficulty := 0.0
 			if v.IsValid() && v.Kind() == reflect.Struct {
@@ -128,7 +128,14 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 						}
 						diffField := latestBlock.FieldByName("Difficulty")
 						if diffField.IsValid() {
-							difficulty = diffField.Float()
+							switch diffField.Kind() {
+							case reflect.Float32, reflect.Float64:
+								difficulty = diffField.Float()
+							case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+								difficulty = float64(diffField.Int())
+							case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+								difficulty = float64(diffField.Uint())
+							}
 						}
 					}
 				}
@@ -158,10 +165,17 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 							latestBlock = latestBlock.Elem()
 						}
 						
-						// Extract real-time difficulty from the latest block if available.
+						// Safely extract real-time difficulty supporting any numeric type.
 						diffField := latestBlock.FieldByName("Difficulty")
 						if diffField.IsValid() {
-							difficulty = diffField.Float()
+							switch diffField.Kind() {
+							case reflect.Float32, reflect.Float64:
+								difficulty = diffField.Float()
+							case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+								difficulty = float64(diffField.Int())
+							case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+								difficulty = float64(diffField.Uint())
+							}
 						}
 					}
 				}
