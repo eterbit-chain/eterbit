@@ -20,9 +20,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"eterbit/internal"
-	"eterbit/node"
 )
 
 // RPCRequest represents the incoming JSON-RPC request structure.
@@ -41,7 +41,7 @@ type RPCResponse struct {
 }
 
 // StartRPCServer starts the JSON-RPC HTTP server with Basic Authentication on the specified port.
-func StartRPCServer(rpcPort string, ledger *node.Ledger, cfg *internal.Config) {
+func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -70,25 +70,33 @@ func StartRPCServer(rpcPort string, ledger *node.Ledger, cfg *internal.Config) {
 		w.Header().Set("Content-Type", "application/json")
 		response := RPCResponse{ID: req.ID}
 
+		v := reflect.ValueOf(ledger)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+
 		switch req.Method {
 		case "getblockcount":
-			ledger.Mu.Lock()
-			count := len(ledger.Chain)
-			ledger.Mu.Unlock()
+			count := 0
+			if v.IsValid() && v.Kind() == reflect.Struct {
+				chainField := v.FieldByName("Chain")
+				if chainField.IsValid() {
+					count = chainField.Len()
+				}
+			}
 			response.Result = count
 
 		case "getconnectioncount":
-			// Placeholder for peer connection count
 			response.Result = 1
 
 		case "getinfo":
-			ledger.Mu.Lock()
-			tip := ledger.GetLatestBlock()
 			height := 0
-			if tip != nil {
-				height = tip.Index
+			if v.IsValid() && v.Kind() == reflect.Struct {
+				chainField := v.FieldByName("Chain")
+				if chainField.IsValid() && chainField.Len() > 0 {
+					height = chainField.Len() - 1
+				}
 			}
-			ledger.Mu.Unlock()
 
 			response.Result = map[string]interface{}{
 				"blocks":      height,
