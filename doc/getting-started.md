@@ -10,16 +10,16 @@ Follow this guide to set up your development environment, compile the binary, an
 Clone the repository to your local machine and compile the source code:
 
 ```bash
-git clone [https://github.com/eterbit-chain/eterbit.git
+git clone https://github.com/eterbit-chain/eterbit.git
 cd eterbit
-go build -o eterbit eterbit.go
+go build -o xcosh xcosh.go
 ```
 
 ## Managing Wallets & Accounts
 Before interacting with the ledger or mining coins, create your local cryptographic account profile:
 
 ```bash
-./eterbit create -label "MainNode"
+./xcosh create -label "MainNode"
 ```
 
 ## Running a Node & Mining
@@ -27,13 +27,13 @@ Start a local network node instance or test block mining manually:
 
 ```bash
 # Check initial account balance
-./eterbit balance
+./xcosh balance
 
 # Start the P2P network node instance
-./eterbit node
+./xcosh node
 
 # Run manual proof-of-work mining targeting your address
-./eterbit mining <your_address>
+./xcosh mining <your_address>
 ```
 
 ## Connecting to Peers & Network Options
@@ -41,13 +41,13 @@ To connect your node to other peers on the network or check network statistics, 
 
 ```bash
 # Connect to a specific peer node manually
-./eterbit addnode 192.168.1.50:19333
+./xcosh addnode 192.168.1.50:19333
 
 # Or start your node with an initial bootstrap connection and custom port
-./eterbit node --port :19333 --connect 192.168.1.50:19333
+./xcosh node --port :19333 --connect 192.168.1.50:19333
 
 # Check active P2P network connections
-./eterbit peers
+./xcosh peers
 ```
 
 ## Checking Supply. Uptime. blockchain size
@@ -55,13 +55,13 @@ You can monitor your node's operational health and token metrics at any time usi
 
 ```bash
 # Check node uptime duration
-./eterbit uptime
+./xcosh uptime
 
 # Check circulating supply and remaining coins to be mined
-./eterbit supply
+./xcosh supply
 
 # View total blockchain storage size and location
-./eterbit blocksize
+./xcosh blocksize
 ```
 
 ## Transactions & Fee Management
@@ -69,10 +69,10 @@ To transfer coins to another address or monitor transaction fee statistics in th
 
 ```bash
 # Send coins to another address with an optional fee and custom sender address
-./eterbit send -to <recipient_address> -amount <val> -fee <val> -from <sender_address>
+./xcosh send -from <recipient_address> -amount <val> -fee <val> -to <sender_address>
 
 # Analyze fee market statistics derived from the active mempool
-./eterbit fees
+./xcosh fees
 ```
 
 ## Blockchain Inspection
@@ -80,13 +80,13 @@ To inspect individual blocks, retrieve block hashes by index, or parse raw block
 
 ```bash
 # Retrieve the block hash corresponding to a numerical index
-./eterbit getblockhash <index>
+./xcosh getblockhash <index>
 
 # Retrieve and render complete structural block data in JSON format based on a hash
-./eterbit getblock <hash>
+./xcosh getblock <hash>
 
 # Parse and inspect structural blockchain blocks directly from disk storage
-./eterbit explorer
+./xcosh explorer
 ```
 
 ## Troubleshooting
@@ -95,7 +95,7 @@ To inspect individual blocks, retrieve block hashes by index, or parse raw block
 If your node fails to start with an error indicating that the port (e.g., `:19333`) is already bound, you can specify a different custom port using the `--port` flag:
 
 ```bash
-./eterbit node --port :19334
+./xcosh node --port :19334
 ```
 
 ## Resetting Blockchain Data
