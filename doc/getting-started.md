@@ -4,7 +4,7 @@ Follow this guide to set up your development environment, compile the binary, an
 
 ## Prerequisites
 * **Go (Golang):** Version 1.20 or higher recommended.
-* **OS:** Linux (Ubuntu/Debian/Termux) or macOS.
+* **OS:** Linux (Ubuntu/Debian/macOS).
 
 ## Installation & Compilation
 Clone the repository to your local machine and compile the source code:
@@ -104,3 +104,9 @@ If your local ledger database becomes out of sync or corrupted during testing, y
 ```bash
 rm -rf ~/.eterbit
 ```
+
+## Support & Contribution
+If you encounter any bugs, issues, or want to contribute to the development of Eterbit Core, feel free to open an issue or pull request on the official repository:
+
+```bash
+* **Repository:** [https://github.com/eterbit-chain/eterbit](https://github.com/eterbit-chain/eterbit)

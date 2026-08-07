@@ -40,7 +40,7 @@ const (
 
 	// Proof-of-Work Target Parameters
 	PowTargetTimespan   int64 = 2 * 24 * 60 * 60  
-	PowTargetSpacing    int64 = 35                   
+	PowTargetSpacing    int64 = 35                     
 	TargetBlockTimeSec  int64 = PowTargetSpacing   
 
 	// ExpectedGenesisHash stores the immutable cryptographic hash checkpoint.
@@ -196,5 +196,22 @@ func VerifyBlockReward(rewardClaimed uint64, feesCollected uint64, blockIndex ui
 	if rewardClaimed > (standardReward + feesCollected) {
 		return fmt.Errorf("CONSENSUS REJECTION: Reward claimed (%d) exceeds allowed protocol limit (%d)", rewardClaimed, standardReward+feesCollected)
 	}
+	return nil
+}
+
+// VerifyBlockReorgTransition validates whether an incoming block for a fork/reorg complies with consensus rules.
+func VerifyBlockReorgTransition(blockHeight uint64, blockHash []byte, prevHash string, currentTipHeight uint64) error {
+	// 1. Verify against hardcoded historical checkpoints if any exist at this height
+	if err := VerifyCheckpoint(blockHeight, blockHash); err != nil {
+		return err
+	}
+
+	// 2. Prevent reorg attempts that try to rewrite history past a hard checkpoint
+	for cpHeight := range HardcodedCheckpoints {
+		if blockHeight <= cpHeight && blockHeight != cpHeight {
+			return fmt.Errorf("CONSENSUS REJECTION: Reorg attempt violates historical checkpoint boundary at height %d", cpHeight)
+		}
+	}
+
 	return nil
 }

@@ -94,8 +94,8 @@ func (ce *ConsensusEngine) AssembleBlockData(b *LedgerBlock, nonce uint64) []byt
 		rawTxData,
 		[]byte(strconv.FormatUint(b.Index, 16)),
 		[]byte(strconv.FormatInt(b.Timestamp, 16)),
-		[]byte(strconv.FormatUint(b.Reward, 16)),          // Include reward for macro-economic hard fork sensitivity
-		[]byte(strconv.FormatUint(blockMaxSupply, 16)),       // Include block-bound max supply for true sovereign hard fork sensitivity
+		[]byte(strconv.FormatUint(b.Reward, 16)),         // Include reward for macro-economic hard fork sensitivity
+		[]byte(strconv.FormatUint(blockMaxSupply, 16)),        // Include block-bound max supply for true sovereign hard fork sensitivity
 		[]byte(strconv.FormatUint(blockHalvingInterval, 16)),   // Include halving interval to trigger hash fingerprint changes on modification
 		[]byte(strconv.FormatUint(uint64(b.Difficulty), 16)),
 		[]byte(strconv.FormatUint(nonce, 16)),

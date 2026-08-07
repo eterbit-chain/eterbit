@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	genesisTimestamp int64  = 1770249600
+	genesisTimestamp int64   = 1770249600
 	genesisBits      uint32 = 504365040
 	pszTimestamp            = "anjayyy"
 )
@@ -445,4 +445,73 @@ func (lc *LedgerCore) MineBlock() {
 	fmt.Printf("[SUCCESS] Block #%d Mined & Saved! (Reward: %.8f, Fee: %.8f, Nonce: %d, Time: %v)\n", newBlock.Index, formatCoin(newBlock.Reward), formatCoin(feeTotal), newBlock.Nonce, duration)
 	fmt.Printf("[CHAIN] Total Blocks: %d | Circulating Supply: %.8f / %.8f\n", len(lc.Chain), formatCoin(lc.GetTotalCirculatingSupply()), formatCoin(consensus.MaxSupply))
 	fmt.Println("--------------------------------------------------------------------------------")
+}
+
+// RollbackBlock removes the latest block from memory, storage, and reverts account state changes.
+func (lc *LedgerCore) RollbackBlock() error {
+	if len(lc.Chain) <= 1 {
+		return fmt.Errorf("cannot rollback genesis block")
+	}
+
+	tip := lc.Chain[len(lc.Chain)-1]
+
+	for _, tx := range tip.Transfers {
+		lc.Mempool = append([]*core.Transfer{tx}, lc.Mempool...)
+	}
+
+	lc.Chain = lc.Chain[:len(lc.Chain)-1]
+
+	if lc.Storage != nil {
+		if err := lc.Storage.DeleteBlock(tip.Index); err != nil {
+			return fmt.Errorf("failed to delete block from storage: %v", err)
+		}
+	}
+
+	lc.State = make(map[string]*AccountState)
+	for _, block := range lc.Chain {
+		lc.RebuildState(block)
+	}
+
+	fmt.Printf("[LEDGER] Successfully rolled back block #%d\n", tip.Index)
+	return nil
+}
+
+// GetBlockByHash retrieves a block from the chain matching the specified hash string.
+func (lc *LedgerCore) GetBlockByHash(hashHex string) *core.LedgerBlock {
+	for _, block := range lc.Chain {
+		if hexHash := fmt.Sprintf("%x", block.Hash); hexHash == hashHex || block.Index == 0 && hashHex == "" {
+			return block
+		}
+	}
+	return nil
+}
+
+// GetLatestBlock returns the highest tip block in the active chain.
+func (lc *LedgerCore) GetLatestBlock() *core.LedgerBlock {
+	if len(lc.Chain) == 0 {
+		return nil
+	}
+	return lc.Chain[len(lc.Chain)-1]
+}
+
+// AppendBlockDirectly appends an alternative valid block directly to the chain during a reorg process.
+func (lc *LedgerCore) AppendBlockDirectly(block *core.LedgerBlock) error {
+	parent := lc.GetLatestBlock()
+	if parent != nil && string(block.PrevHash) != string(parent.Hash) {
+		return fmt.Errorf("block previous hash does not match current chain tip")
+	}
+
+	currentSupply := lc.GetTotalCirculatingSupply()
+	if err := core.ValidateBlockConsensus(block, parent, currentSupply); err != nil {
+		return fmt.Errorf("consensus validation failed for alternative block: %v", err)
+	}
+
+	lc.Chain = append(lc.Chain, block)
+	if lc.Storage != nil {
+		lc.Storage.SaveBlock(block.Index, block)
+	}
+	lc.RebuildState(block)
+
+	fmt.Printf("[LEDGER] Successfully appended alternative block #%d to active chain\n", block.Index)
+	return nil
 }
