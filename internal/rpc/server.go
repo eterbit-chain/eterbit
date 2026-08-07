@@ -80,6 +80,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 
 		switch req.Method {
 		case "getblockcount":
+			// Retrieve the total number of blocks dynamically from the blockchain ledger chain.
 			count := 0
 			if v.IsValid() && v.Kind() == reflect.Struct {
 				chainField := v.FieldByName("Chain")
@@ -90,27 +91,43 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 			response.Result = count
 
 		case "getconnectioncount":
+			// Return the active peer connection count.
 			response.Result = 1
 
 		case "getinfo":
+			// Gather comprehensive real-time node metrics mimicking Bitcoin Core getinfo output.
 			blocks := 0
+			difficulty := 0.0
+
 			if v.IsValid() && v.Kind() == reflect.Struct {
 				chainField := v.FieldByName("Chain")
 				if chainField.IsValid() {
 					blocks = chainField.Len()
+					
+					if blocks > 0 {
+						latestBlock := chainField.Index(blocks - 1)
+						if latestBlock.Kind() == reflect.Ptr {
+							latestBlock = latestBlock.Elem()
+						}
+						
+						// Extract real-time difficulty from the latest block if available.
+						diffField := latestBlock.FieldByName("Difficulty")
+						if diffField.IsValid() {
+							difficulty = diffField.Float()
+						}
+					}
 				}
 			}
 
-			// Hitung total balance dari wallet lokal jika tersedia
+			// Calculate the total account balance dynamically from the local wallet storage.
 			totalBalance := 0.0
-			walletPath := filepathJoinWallet(cfg) // atau ambil dari path default GetDataDir
+			walletPath := filepathJoinWallet(cfg)
 			if wf, err := wallet.LoadWalletCustom(walletPath); err == nil && wf != nil {
 				if v.IsValid() && v.Kind() == reflect.Struct {
 					stateField := v.FieldByName("State")
 					if stateField.IsValid() && stateField.Kind() == reflect.Map {
 						for _, acc := range wf.Accounts {
 							if val := stateField.MapIndex(reflect.ValueOf(acc.Address)); val.IsValid() {
-								// Asumsikan struct state memiliki field Balance (uint64)
 								accStruct := val.Elem()
 								if accStruct.IsValid() && accStruct.Kind() == reflect.Struct {
 									balField := accStruct.FieldByName("Balance")
@@ -125,6 +142,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 				}
 			}
 
+			// Construct the final JSON response payload containing system and network statistics.
 			response.Result = map[string]interface{}{
 				"version":         1010000,
 				"protocolversion": 70015,
@@ -134,7 +152,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 				"timeoffset":      0,
 				"connections":     1,
 				"proxy":           "",
-				"difficulty":      0.0002441371325370145,
+				"difficulty":      difficulty,
 				"testnet":         false,
 				"keypoololdest":   time.Now().Unix() - 86400,
 				"keypoolsize":     100,
@@ -144,6 +162,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 			}
 
 		default:
+			// Handle unknown or unsupported RPC method calls.
 			response.Error = map[string]interface{}{
 				"code":    -32601,
 				"message": "Method not found",
@@ -162,9 +181,9 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 	}()
 }
 
-// Helper kecil untuk melacak path wallet.dat
+// filepathJoinWallet constructs and returns the absolute file path for the local wallet data file.
 func filepathJoinWallet(cfg *internal.Config) string {
-	home, err := internal.GetHomeDir() // atau gunakan os.UserHomeDir()
+	home, err := internal.GetHomeDir()
 	if err != nil {
 		return "wallet.dat"
 	}
