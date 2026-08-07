@@ -1,4 +1,4 @@
-module eterbit
+module xcosh
 
 go 1.25.0
 
