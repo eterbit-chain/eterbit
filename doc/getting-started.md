@@ -74,3 +74,16 @@ To transfer coins to another address or monitor transaction fee statistics in th
 # Analyze fee market statistics derived from the active mempool
 ./eterbit fees
 ```
+
+## Blockchain Inspection
+To inspect individual blocks, retrieve block hashes by index, or parse raw blockchain data from storage, use:
+
+```bash
+# Retrieve the block hash corresponding to a numerical index
+./eterbit getblockhash <index>
+
+# Retrieve and render complete structural block data in JSON format based on a hash
+./eterbit getblock <hash>
+
+# Parse and inspect structural blockchain blocks directly from disk storage
+./eterbit explorer
