@@ -95,29 +95,14 @@ func RunNodeDaemon(port string, connectPeer string) {
 			return
 		}
 
-		// Map the incoming core LedgerBlock into an internal Block structure for reorganization evaluation.
-		internalBlock := &internal.Block{
-			Hash:      block.Hash,
-			PrevHash:  block.PrevHash,
-			Height:    int64(block.Index),
-			Nonce:     block.Nonce,
-			Timestamp: block.Timestamp,
-		}
-
 		// Verify strict consensus rules and historical checkpoint boundaries for the incoming block transition.
-		if err := consensus.VerifyBlockReorgTransition(block.Index, []byte(block.Hash), block.PrevHash, uint64(currentTip.Index)); err != nil {
+		if err := consensus.VerifyBlockReorgTransition(block.Index, block.Hash, block.PrevHash, uint64(currentTip.Index)); err != nil {
 			fmt.Printf("[P2P REJECTION] Block reorg transition rejected: %v\n", err)
 			return
 		}
 
 		// Evaluate and handle chain reorganization or direct append through the ReorgManager.
-		if err := reorgManager.HandleReorg(internalBlock, &internal.Block{
-			Hash:      currentTip.Hash,
-			PrevHash:  currentTip.PrevHash,
-			Height:    int64(currentTip.Index),
-			Nonce:     currentTip.Nonce,
-			Timestamp: currentTip.Timestamp,
-		}); err != nil {
+		if err := reorgManager.HandleReorg(block, currentTip); err != nil {
 			fmt.Printf("[P2P] Failed to process block reorganization: %v\n", err)
 		}
 	}
