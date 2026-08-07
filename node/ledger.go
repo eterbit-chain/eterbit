@@ -30,9 +30,9 @@ import (
 )
 
 const (
-	genesisTimestamp int64   = 1770249600
-	genesisBits      uint32 = 504365040
-	pszTimestamp            = "anjayyy"
+	genesisTimestamp    int64  = 1770249600
+	genesisBits         uint32 = 504365040
+	pszTimestamp               = "anjayyy"
 )
 
 // AccountState represents the account balance and transaction sequence nonce.
@@ -150,8 +150,6 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 		currentMaxSupply := consensus.MaxSupply
 		currentHalvingInterval := consensus.HalvingInterval
 
-		// Dynamic Sovereign Hard Fork Guard: Enforce strict macro-economic and halving interval consensus validation.
-		// If genesis parameters, reward, max supply, or halving interval policies are altered in source code, instantly wipe storage and trigger a sovereign hard fork.
 		if storedGenesis.Message != pszTimestamp || storedGenesis.Timestamp != genesisTimestamp || storedGenesis.Bits != genesisBits || storedGenesis.Reward != currentConsensusReward || storedGenesis.MaxSupply != currentMaxSupply || storedGenesis.HalvingInterval != currentHalvingInterval {
 			fmt.Println("\n================================================================================")
 			fmt.Println("[CONSENSUS EVENT] Genesis parameters or macroeconomic policies modified in code! Triggering Sovereign Hard Fork...")
@@ -160,12 +158,10 @@ func (lc *LedgerCore) LoadFromDisk() bool {
 			fmt.Println("[CONSENSUS EVENT] Automatically wiping storage and re-mining genesis block...")
 			fmt.Println("================================================================================")
 
-			// Clear stored chain and reset storage database completely
 			lc.Chain = make([]*core.LedgerBlock, 0)
 			lc.State = make(map[string]*AccountState)
 			lc.Storage.ClearAll()
 			
-			// Re-spawn new dynamic genesis block
 			lc.SpawnGenesis()
 			return true
 		}
@@ -334,16 +330,15 @@ func (lc *LedgerCore) MineBlock() {
 	var feeTotal uint64 = 0
 
 	if len(lc.Mempool) > 0 {
-		var currentBlockBytes uint64 = 512 // Estimasi dasar header blok
+		var currentBlockBytes uint64 = 512
 
 		for i := 0; i < len(lc.Mempool); i++ {
 			tx := lc.Mempool[i]
 			
-			// Serialisasi transaksi untuk mengukur ukuran byte secara akurat demi mematuhi batas 4 MB
 			txBytes, err := json.Marshal(tx)
 			txSize := uint64(len(txBytes))
 			if err != nil || currentBlockBytes+txSize > consensus.MaxBlockSizeBytes {
-				break // Hentikan pengambilan transaksi jika total ukuran blok mendekati atau melebihi batas 4 MB
+				break
 			}
 
 			sender := crypto.PubkeyToAddress(tx.SenderPubKey)
@@ -447,6 +442,14 @@ func (lc *LedgerCore) MineBlock() {
 	fmt.Println("--------------------------------------------------------------------------------")
 }
 
+// DeleteBlock removes a block entry from the database by its index.
+func (lc *LedgerCore) DeleteBlock(index uint64) error {
+	if lc.Storage == nil {
+		return fmt.Errorf("storage database is uninitialized")
+	}
+	return lc.Storage.DeleteBlock(index)
+}
+
 // RollbackBlock removes the latest block from memory, storage, and reverts account state changes.
 func (lc *LedgerCore) RollbackBlock() error {
 	if len(lc.Chain) <= 1 {
@@ -462,7 +465,7 @@ func (lc *LedgerCore) RollbackBlock() error {
 	lc.Chain = lc.Chain[:len(lc.Chain)-1]
 
 	if lc.Storage != nil {
-		if err := lc.Storage.DeleteBlock(tip.Index); err != nil {
+		if err := lc.DeleteBlock(tip.Index); err != nil {
 			return fmt.Errorf("failed to delete block from storage: %v", err)
 		}
 	}

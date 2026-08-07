@@ -86,6 +86,23 @@ func (d *Database) GetBlock(index uint64) ([]byte, error) {
 	return d.DB.Get([]byte(key), nil)
 }
 
+// DeleteBlock removes a specific block entry from disk storage and decrements the last index pointer.
+func (d *Database) DeleteBlock(index uint64) error {
+	key := "block_" + strconv.FormatUint(index, 10)
+	err := d.DB.Delete([]byte(key), nil)
+	if err != nil {
+		return err
+	}
+
+	// Update last_index pointer to the previous block height if applicable
+	if index > 0 {
+		newLast := index - 1
+		return d.DB.Put([]byte("last_index"), []byte(strconv.FormatUint(newLast, 10)), nil)
+	}
+
+	return d.DB.Delete([]byte("last_index"), nil)
+}
+
 // ClearAll iterates through all keys stored in the database, batches them, and deletes them completely for hard fork resets.
 func (d *Database) ClearAll() error {
 	// Create an iterator to scan all keys present in the LevelDB instance.

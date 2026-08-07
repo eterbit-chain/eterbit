@@ -16,8 +16,11 @@
 package internal
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+
+	"eterbit/core"
 )
 
 // BlockReorgManager handles the blockchain reorganization (reorg) logic.
@@ -31,14 +34,14 @@ func NewBlockReorgManager() *BlockReorgManager {
 }
 
 // HandleReorg checks whether an incoming block extends the main chain or triggers a fork reorganization.
-func (m *BlockReorgManager) HandleReorg(newBlock *Block, currentTip *Block) error {
+func (m *BlockReorgManager) HandleReorg(newBlock *core.LedgerBlock, currentTip *core.LedgerBlock) error {
 	// 1. If the new block directly extends the current active chain tip
-	if newBlock.PrevHash == currentTip.Hash {
+	if bytes.Equal(newBlock.PrevHash, currentTip.Hash) {
 		return m.AppendToMainChain(newBlock)
 	}
 
-	// 2. If the new block has an equal or higher height, indicating a potential fork
-	if newBlock.Height >= currentTip.Height {
+	// 2. If the new block has an equal or higher height/index, indicating a potential fork
+	if newBlock.Index >= currentTip.Index {
 		fmt.Println("[Reorg] Fork detected! Evaluating alternative chain...")
 
 		ancestor, err := m.FindCommonAncestor(currentTip, newBlock)
@@ -65,29 +68,29 @@ func (m *BlockReorgManager) HandleReorg(newBlock *Block, currentTip *Block) erro
 }
 
 // AppendToMainChain adds a valid block normally to the tip of the primary active chain.
-func (m *BlockReorgManager) AppendToMainChain(block *Block) error {
+func (m *BlockReorgManager) AppendToMainChain(block *core.LedgerBlock) error {
 	// Implementation logic for saving the block to the active main chain database
-	fmt.Printf("[Chain] Appending block %s at height %d to main chain\n", block.Hash[:8], block.Height)
+	fmt.Printf("[Chain] Appending block %x at index %d to main chain\n", block.Hash[:8], block.Index)
 	return nil
 }
 
 // FindCommonAncestor traces backward to locate the latest shared ancestor block between two chains.
-func (m *BlockReorgManager) FindCommonAncestor(tipA *Block, tipB *Block) (*Block, error) {
+func (m *BlockReorgManager) FindCommonAncestor(tipA *core.LedgerBlock, tipB *core.LedgerBlock) (*core.LedgerBlock, error) {
 	// Implementation logic to traverse parent hashes until a common block is found
 	fmt.Println("[Reorg] Locating common ancestor...")
-	return &Block{}, nil // Adjust this to match your project's Block struct
+	return &core.LedgerBlock{}, nil
 }
 
 // RollbackChain disconnects blocks from the active main chain and returns their transactions to the mempool.
-func (m *BlockReorgManager) RollbackChain(fromTip *Block, ancestor *Block) error {
-	fmt.Printf("[Reorg] Rolling back from block %s down to ancestor %s\n", fromTip.Hash[:8], ancestor.Hash[:8])
+func (m *BlockReorgManager) RollbackChain(fromTip *core.LedgerBlock, ancestor *core.LedgerBlock) error {
+	fmt.Printf("[Reorg] Rolling back from block %x down to ancestor %x\n", fromTip.Hash[:8], ancestor.Hash[:8])
 	// Implementation logic for disconnecting blocks and restoring transactions
 	return nil
 }
 
 // ApplyAlternativeChain connects and validates blocks from the new heavier branch to establish the new active chain.
-func (m *BlockReorgManager) ApplyAlternativeChain(toTip *Block, ancestor *Block) error {
-	fmt.Printf("[Reorg] Applying new chain branch up to block %s\n", toTip.Hash[:8])
+func (m *BlockReorgManager) ApplyAlternativeChain(toTip *core.LedgerBlock, ancestor *core.LedgerBlock) error {
+	fmt.Printf("[Reorg] Applying new chain branch up to block %x\n", toTip.Hash[:8])
 	// Implementation logic for validating and attaching new branch blocks
 	return nil
 }
