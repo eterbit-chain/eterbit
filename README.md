@@ -1,6 +1,6 @@
 Eterbit v0.1.0
 
-Copyright (c) 2026 Eterbit Core.
+Copyright (c) 2026 Xcosh Core.
 Copyright (c) 2026 AldianOkto (Subang, Indonesian). All rights reserved.
 Distributed under the Apache License, Version 2.0, see the accompanying
 file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.
