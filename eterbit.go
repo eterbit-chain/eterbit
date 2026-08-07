@@ -70,47 +70,39 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Switch execution branch based upon the primary subcommand supplied in system arguments.
-	switch os.Args[1] {
+	subcommand := os.Args[1]
+
+	// Check if the command is meant to be handled via JSON-RPC client forwarding.
+	// Common RPC methods like getblockcount, getconnectioncount, getinfo, etc. can be passed directly.
+	switch subcommand {
 	case "create":
-		// Parse creation flag options and invoke the modular CLI wallet creation handler.
 		walletCreateCmd.Parse(os.Args[2:])
 		cli.HandleCreateWalletAccount(*walletLabel)
 	case "balance":
-		// Parse balance check options and invoke the modular CLI balance lookup handler.
 		balanceCmd.Parse(os.Args[2:])
 		cli.HandleCheckBalance()
 	case "supply":
-		// Parse supply metrics options and invoke the circulating and max supply inspection handler.
 		supplyCmd.Parse(os.Args[2:])
 		cli.HandleCheckSupply()
 	case "send":
-		// Parse transaction transfer parameters and invoke the modular CLI transaction dispatch handler.
 		sendCmd.Parse(os.Args[2:])
-		
-		// Parse amount safely using string parsing to support extremely small decimal fractions or massive numeric quantities without floating-point precision loss
 		var amountInUnits uint64
 		if val, err := strconv.ParseFloat(*sendAmountStr, 64); err == nil {
 			amountInUnits = uint64(val * 100000000)
 		} else {
 			amountInUnits = 0
 		}
-
 		cli.HandleSendTx(*sendRecipient, amountInUnits, *sendFee, *sendSenderAddr)
 	case "node":
-		// Parse node server flag parameters and bootstrap the background P2P validator daemon service.
 		nodeCmd.Parse(os.Args[2:])
 		daemon.RunNodeDaemon(*nodePort, *nodeConnect)
 	case "explorer":
-		// Parse block inspection flag options and invoke the modular blockchain explorer handler.
 		explorerCmd.Parse(os.Args[2:])
 		cli.HandleExploreBlockchain()
 	case "mine":
-		// Parse block generation parameters and invoke the manual Proof-of-Work mining handler.
 		mineCmd.Parse(os.Args[2:])
 		cli.HandleManualMine(*mineBlocks, *mineAddress)
 	case "mining":
-		// Validate custom inline target address arguments for simplified mining commands.
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: go run eterbit.go mining <target_address>")
 			os.Exit(1)
@@ -118,7 +110,6 @@ func main() {
 		miningCmd.Parse(os.Args[3:])
 		cli.HandleManualMine(1, os.Args[2])
 	case "addnode":
-		// Validate required peer connection parameters before executing manual addnode registration.
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: go run eterbit.go addnode <host:port>")
 			os.Exit(1)
@@ -126,27 +117,21 @@ func main() {
 		addNodeCmd.Parse(os.Args[2:])
 		cli.HandleAddNode(*addNodeTarget)
 	case "peers":
-		// Parse peer diagnostic flags and invoke the connected peer information handler.
 		peersCmd.Parse(os.Args[2:])
 		cli.HandleCheckPeers()
 	case "fees":
-		// Parse fee market flag options and invoke the mempool fee market statistics handler.
 		feesCmd.Parse(os.Args[2:])
 		cli.HandleCheckFees()
 	case "uptime":
-		// Parse uptime diagnostic parameters and invoke the operational duration tracking handler.
 		uptimeCmd.Parse(os.Args[2:])
 		cli.HandleCheckUptime()
 	case "getnettotals":
-		// Parse network traffic flags and invoke the network traffic totals diagnostic handler.
 		getNetTotalsCmd.Parse(os.Args[2:])
 		cli.HandleGetNetTotals()
 	case "blocksize":
-		// Parse blockchain storage size flags and invoke the physical disk usage diagnostic handler.
 		blockSizeCmd.Parse(os.Args[2:])
 		cli.HandleCheckBlockSize()
 	case "getblockhash":
-		// Verify that the required block index parameter has been adequately supplied prior to command parsing.
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: go run eterbit.go getblockhash <block_index>")
 			os.Exit(1)
@@ -154,7 +139,6 @@ func main() {
 		getBlockHashCmd.Parse(os.Args[2:])
 		cli.HandleGetBlockHash(os.Args[2])
 	case "getblock":
-		// Verify that the required block hash parameter has been adequately supplied prior to command parsing.
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: go run eterbit.go getblock <block_hash>")
 			os.Exit(1)
@@ -162,15 +146,18 @@ func main() {
 		getBlockCmd.Parse(os.Args[2:])
 		cli.HandleGetBlock(os.Args[2])
 	default:
-		// Fallback to displaying usage instructions if an unrecognized command subcommand is provided.
-		printUsage()
-		os.Exit(1)
+		// Forward any other subcommand (such as getblockcount, getinfo, getconnectioncount)
+		// directly to the running daemon via the JSON-RPC client handler.
+		var params []interface{}
+		for _, arg := range os.Args[2:] {
+			params = append(params, arg)
+		}
+		cli.HandleRPCClient(subcommand, params)
 	}
 }
 
 // printUsage outputs the standard command-line manual instructions and available command options to standard output.
 func printUsage() {
-	// Render comprehensive structural documentation regarding available console commands.
 	fmt.Println("================================================================================")
 	fmt.Println(" ETERBIT BLOCKCHAIN CLI MANAGER (MULTI-WALLET ARCHITECTURE)")
 	fmt.Println("================================================================================")
@@ -191,5 +178,8 @@ func printUsage() {
 	fmt.Println("  go run eterbit.go blocksize")
 	fmt.Println("  go run eterbit.go getblockhash <index>")
 	fmt.Println("  go run eterbit.go getblock <hash>")
+	fmt.Println("  go run eterbit.go getblockcount (RPC)")
+	fmt.Println("  go run eterbit.go getinfo (RPC)")
+	fmt.Println("  go run eterbit.go getconnectioncount (RPC)")
 	fmt.Println("================================================================================")
 }
