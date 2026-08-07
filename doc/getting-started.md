@@ -87,3 +87,11 @@ To inspect individual blocks, retrieve block hashes by index, or parse raw block
 
 # Parse and inspect structural blockchain blocks directly from disk storage
 ./eterbit explorer
+```
+
+## Troubleshooting
+
+### 1. Port Already in Use
+If your node fails to start with an error indicating that the port (e.g., `:19333`) is already bound, you can specify a different custom port using the `--port` flag:
+```bash
+./eterbit node --port :19334
