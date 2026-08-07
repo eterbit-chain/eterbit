@@ -1,8 +1,8 @@
-# Eterbit CLI Reference Guide
+# Xcosh CLI Reference Guide
 
 All persistent node data, LevelDB blockchain state, multi-wallet credentials (`wallet.dat`), transaction mempool, and P2P peer tables are securely stored in the centralized external directory at `~/.eterbit/`.
 
-*(Note: You can use `go run eterbit.go <command>` or build the binary and use `./eterbit <command>`)*
+*(Note: You can use `go run eterbit.go <command>` or build the binary and use `./xcosh <command>`)*
 
 ## Available Commands
 
@@ -11,7 +11,7 @@ All persistent node data, LevelDB blockchain state, multi-wallet credentials (`w
 | `create [-label <account_label>]` | Provisions a new post-quantum cryptographic keypair account inside the centralized wallet container (`wallet.dat`). |
 | `balance` | Queries the state database and displays all registered account balances and nonces. |
 | `supply` | Displays maximum coin supply, circulating supply, and remaining coins available to mine. |
-| `send -to <addr> -amount <val> [-fee <val>] [-from <sender_addr>]` | Constructs, digitally signs (Dilithium Mode 3), and broadcasts a value transfer transaction to the mempool. |
+| `send -from <addr> -amount <val> [-fee <val>] [-to <sender_addr>]` | Constructs, digitally signs (Dilithium Mode 3), and broadcasts a value transfer transaction to the mempool. |
 | `node [--port :port] [--connect host:port]` | Starts the P2P networking server and handles incoming/outgoing peer connections. |
 | `addnode <host:port>` | Manually registers and adds a target peer address into the addrman database. |
 | `mine [-blocks <num>] [-address <addr>]` | Executes iterative Proof-of-Work block mining with optional block count and target reward address flags. |
