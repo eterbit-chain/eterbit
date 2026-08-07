@@ -96,7 +96,7 @@ func RunNodeDaemon(port string, connectPeer string) {
 		}
 
 		// Verify strict consensus rules and historical checkpoint boundaries for the incoming block transition.
-		if err := consensus.VerifyBlockReorgTransition(block.Index, block.Hash, block.PrevHash, uint64(currentTip.Index)); err != nil {
+		if err := consensus.VerifyBlockReorgTransition(block.Index, block.Hash, string(block.PrevHash), uint64(currentTip.Index)); err != nil {
 			fmt.Printf("[P2P REJECTION] Block reorg transition rejected: %v\n", err)
 			return
 		}
