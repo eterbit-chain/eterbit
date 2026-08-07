@@ -45,7 +45,7 @@ const (
 
 	// ExpectedGenesisHash stores the immutable cryptographic hash checkpoint.
 	// Jika MaxSupply atau BlockReward diubah, hash ini wajib disesuaikan atau node akan menolak rantai.
-	ExpectedGenesisHash string = "000001e6db367c1d0813b9e8215d190cacf14d602d60880ee27eddb3ac5a0202"
+	ExpectedGenesisHash string = "00000cac47528e27627a256f5ba877e4768d22417fd873532ffdea8d0c7be77a"
 )
 
 // HardcodedCheckpoints stores trusted historical checkpoints.
