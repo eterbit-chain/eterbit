@@ -91,7 +91,16 @@ To inspect individual blocks, retrieve block hashes by index, or parse raw block
 
 ## Troubleshooting
 
-### 1. Port Already in Use
+### Port Already in Use
 If your node fails to start with an error indicating that the port (e.g., `:19333`) is already bound, you can specify a different custom port using the `--port` flag:
+
 ```bash
 ./eterbit node --port :19334
+```
+
+## Resetting Blockchain Data
+If your local ledger database becomes out of sync or corrupted during testing, you can safely remove the local data directory to start fresh (make sure to back up your wallet.dat file first):
+
+```bash
+rm -rf ~/.eterbit
+```
