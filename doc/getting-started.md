@@ -6,7 +6,7 @@ Follow this guide to set up your development environment, compile the binary, an
 * **Go (Golang):** Version 1.20 or higher recommended.
 * **OS:** Linux (Ubuntu/Debian/Termux) or macOS.
 
-## 1. Installation & Compilation
+## Installation & Compilation
 Clone the repository to your local machine and compile the source code:
 
 ```bash
@@ -15,14 +15,14 @@ cd eterbit
 go build -o eterbit eterbit.go
 ```
 
-## 2. Managing Wallets & Accounts
+## Managing Wallets & Accounts
 Before interacting with the ledger or mining coins, create your local cryptographic account profile:
 
 ```bash
 ./eterbit create -label "MainNode"
 ```
 
-## 3. Running a Node & Mining
+## Running a Node & Mining
 Start a local network node instance or test block mining manually:
 
 ```bash
@@ -35,3 +35,27 @@ Start a local network node instance or test block mining manually:
 # Run manual proof-of-work mining targeting your address
 ./eterbit mining <your_address>
 ```
+
+## Connecting to Peers & Network Options
+To connect your node to other peers on the network or check network statistics, use the following optional flags and commands:
+
+```bash
+# Connect to a specific peer node manually
+./eterbit addnode 192.168.1.50:19333
+
+# Or start your node with an initial bootstrap connection and custom port
+./eterbit node --port :19333 --connect 192.168.1.50:19333
+
+# Check active P2P network connections
+./eterbit peers
+```
+
+## Checking Supply and Uptime
+You can monitor your node's operational health and token metrics at any time using:
+
+```bash
+# Check node uptime duration
+./eterbit uptime
+
+# Check circulating supply and remaining coins to be mined
+./eterbit supply
