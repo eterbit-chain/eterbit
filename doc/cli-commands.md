@@ -1,6 +1,6 @@
 # Xcosh CLI Reference Guide
 
-All persistent node data, LevelDB blockchain state, multi-wallet credentials (`wallet.dat`), transaction mempool, and P2P peer tables are securely stored in the centralized external directory at `~/.eterbit/`.
+All persistent node data, LevelDB blockchain state, multi-wallet credentials (`wallet.dat`), transaction mempool, and P2P peer tables are securely stored in the centralized external directory at `~/.xcosh`.
 
 *(Note: You can use `go run eterbit.go <command>` or build the binary and use `./xcosh <command>`)*
 
