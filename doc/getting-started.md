@@ -10,7 +10,7 @@ Follow this guide to set up your development environment, compile the binary, an
 Clone the repository to your local machine and compile the source code:
 
 ```bash
-git clone https://github.com/eterbit-chain/eterbit.git
+git clone https://github.com/xcosh-chain/xcosh.git
 cd xcosh
 go build -o xcosh xcosh.go
 ```
