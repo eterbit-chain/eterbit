@@ -41,8 +41,21 @@ func RunNodeDaemon(port string, connectPeer string) {
 
 	// Initialize database storage directory and state ledger contexts.
 	dataDir := cli.GetDataDir()
+
+	// Load configuration settings from eterbit.conf if available.
+	cfg, err := internal.LoadConfig(dataDir)
+	if err != nil {
+		fmt.Println("[SYS] Warning: Failed to load configuration settings, using defaults.")
+	}
+
+	// Override port with configuration file setting if default port is used.
+	serverPort := port
+	if serverPort == ":19333" && cfg.Port != ":19333" {
+		serverPort = cfg.Port
+	}
+
 	ledger := node.InitializeLedger(dataDir, 3, addrMiner)
-	server := p2p.NewServer(port)
+	server := p2p.NewServer(serverPort)
 
 	// Initialize the block reorganization manager.
 	reorgManager := internal.NewBlockReorgManager()
@@ -136,7 +149,7 @@ func RunNodeDaemon(port string, connectPeer string) {
 
 	// Output operational node status parameters to standard output.
 	fmt.Printf("[NODE] Active validator miner: %s\n", addrMiner)
-	fmt.Printf("[NODE] P2P Server listening on %s\n", port)
+	fmt.Printf("[NODE] P2P Server listening on %s\n", serverPort)
 	fmt.Println("[NODE] Node operational and listening. Press Ctrl+C to terminate.")
 	
 	// Block the main execution thread indefinitely to maintain the live daemon process.
