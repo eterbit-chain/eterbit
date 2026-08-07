@@ -388,12 +388,19 @@ type RPCResponse struct {
 func HandleRPCClient(method string, params []interface{}) {
 	dataDir := GetDataDir()
 	cfg, err := internal.LoadConfig(dataDir)
-	if err != nil {
-		fmt.Printf("[CLI] Error loading configuration: %v\n", err)
-		os.Exit(1)
+	
+	rpcPort := "19332"
+	var rpcUser, rpcPass string
+	
+	if err == nil && cfg != nil {
+		if cfg.RPCPort != "" {
+			rpcPort = cfg.RPCPort
+		}
+		rpcUser = cfg.RPCUser
+		rpcPass = cfg.RPCPassword
 	}
 
-	rpcURL := fmt.Sprintf("http://127.0.0.1:%s/", cfg.RPCPort)
+	rpcURL := fmt.Sprintf("http://127.0.0.1:%s/", rpcPort)
 
 	rpcReq := RPCRequest{
 		Jsonrpc: "2.0",
@@ -416,8 +423,8 @@ func HandleRPCClient(method string, params []interface{}) {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	if cfg.RPCUser != "" || cfg.RPCPassword != "" {
-		auth := cfg.RPCUser + ":" + cfg.RPCPassword
+	if rpcUser != "" || rpcPass != "" {
+		auth := rpcUser + ":" + rpcPass
 		encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
 		req.Header.Set("Authorization", "Basic "+encodedAuth)
 	}
