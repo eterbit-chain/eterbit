@@ -1,4 +1,4 @@
-Eterbit v0.1.0
+Xcosh Core No Version
 
 Copyright (c) 2026 Xcosh Core.
 Copyright (c) 2026 AldianOkto (Subang, Indonesian). All rights reserved.
