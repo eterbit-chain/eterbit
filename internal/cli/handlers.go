@@ -16,10 +16,13 @@
 package cli
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -364,4 +367,92 @@ func HandleGetBlock(targetHash string) {
 	fmt.Println("================================================================")
 	fmt.Println(string(jsonData))
 	fmt.Println("================================================================")
+}
+
+// RPCRequest defines the standard JSON-RPC payload format for CLI client requests.
+type RPCRequest struct {
+	Jsonrpc string        `json:"jsonrpc"`
+	Method  string        `json:"method"`
+	Params  []interface{} `json:"params"`
+	ID      interface{}   `json:"id"`
+}
+
+// RPCResponse defines the standard JSON-RPC response format for CLI client responses.
+type RPCResponse struct {
+	Result interface{} `json:"result"`
+	Error  interface{} `json:"error,omitempty"`
+	ID     interface{} `json:"id"`
+}
+
+// HandleRPCClient executes a remote JSON-RPC command from the CLI client to the running daemon.
+func HandleRPCClient(method string, params []interface{}) {
+	dataDir := GetDataDir()
+	cfg, err := internal.LoadConfig(dataDir)
+	if err != nil {
+		fmt.Printf("[CLI] Error loading configuration: %v\n", err)
+		os.Exit(1)
+	}
+
+	rpcURL := fmt.Sprintf("http://127.0.0.1:%s/", cfg.RPCPort)
+
+	rpcReq := RPCRequest{
+		Jsonrpc: "2.0",
+		Method:  method,
+		Params:  params,
+		ID:      1,
+	}
+
+	bodyData, err := json.Marshal(rpcReq)
+	if err != nil {
+		fmt.Printf("[CLI] Error marshalling request: %v\n", err)
+		os.Exit(1)
+	}
+
+	req, err := http.NewRequest("POST", rpcURL, bytes.NewBuffer(bodyData))
+	if err != nil {
+		fmt.Printf("[CLI] Error creating HTTP request: %v\n", err)
+		os.Exit(1)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	if cfg.RPCUser != "" || cfg.RPCPassword != "" {
+		auth := cfg.RPCUser + ":" + cfg.RPCPassword
+		encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
+		req.Header.Set("Authorization", "Basic "+encodedAuth)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("[CLI] Error connecting to Eterbit daemon at %s: %v\n", rpcURL, err)
+		fmt.Println("[CLI] Make sure 'eterbitd' daemon is running!")
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		fmt.Println("[CLI] Error: Unauthorized. Check your rpcuser and rpcpassword in eterbit.conf")
+		os.Exit(1)
+	}
+
+	var rpcResp RPCResponse
+	if err := json.NewDecoder(resp.Body).Decode(&rpcResp); err != nil {
+		fmt.Printf("[CLI] Error decoding JSON response: %v\n", err)
+		os.Exit(1)
+	}
+
+	if rpcResp.Error != nil {
+		errorBytes, _ := json.MarshalIndent(rpcResp.Error, "", "    ")
+		fmt.Printf("[CLI] RPC Error:\n%s\n", string(errorBytes))
+		os.Exit(1)
+	}
+
+	output, err := json.MarshalIndent(rpcResp.Result, "", "    ")
+	if err != nil {
+		fmt.Printf("%v\n", rpcResp.Result)
+		return
+	}
+
+	fmt.Println(string(output))
 }
