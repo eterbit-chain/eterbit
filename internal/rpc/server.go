@@ -239,7 +239,7 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 
 // filepathJoinWallet constructs and returns the absolute file path for the local wallet data file.
 func filepathJoinWallet(cfg *internal.Config) string {
-	home, err := internal.GetHomeDir()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		return "wallet.dat"
 	}
