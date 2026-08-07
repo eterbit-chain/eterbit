@@ -104,14 +104,14 @@ func main() {
 		cli.HandleManualMine(*mineBlocks, *mineAddress)
 	case "mining":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: go run eterbit.go mining <target_address>")
+			fmt.Println("Usage: ./eterbit mining <target_address>")
 			os.Exit(1)
 		}
 		miningCmd.Parse(os.Args[3:])
 		cli.HandleManualMine(1, os.Args[2])
 	case "addnode":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: go run eterbit.go addnode <host:port>")
+			fmt.Println("Usage: ./eterbit addnode <host:port>")
 			os.Exit(1)
 		}
 		addNodeCmd.Parse(os.Args[2:])
@@ -133,14 +133,14 @@ func main() {
 		cli.HandleCheckBlockSize()
 	case "getblockhash":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: go run eterbit.go getblockhash <block_index>")
+			fmt.Println("Usage: ./eterbit getblockhash <block_index>")
 			os.Exit(1)
 		}
 		getBlockHashCmd.Parse(os.Args[2:])
 		cli.HandleGetBlockHash(os.Args[2])
 	case "getblock":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: go run eterbit.go getblock <block_hash>")
+			fmt.Println("Usage: ./eterbit getblock <block_hash>")
 			os.Exit(1)
 		}
 		getBlockCmd.Parse(os.Args[2:])
@@ -162,24 +162,24 @@ func printUsage() {
 	fmt.Println(" ETERBIT BLOCKCHAIN CLI MANAGER (MULTI-WALLET ARCHITECTURE)")
 	fmt.Println("================================================================================")
 	fmt.Println("Available commands:")
-	fmt.Println("  go run eterbit.go create [-label <account_label>]")
-	fmt.Println("  go run eterbit.go balance")
-	fmt.Println("  go run eterbit.go supply")
-	fmt.Println("  go run eterbit.go send -to <addr> -amount <val> [-fee <val>] [-from <sender_addr>]")
-	fmt.Println("  go run eterbit.go node [--port :port] [--connect host:port]")
-	fmt.Println("  go run eterbit.go addnode <host:port>")
-	fmt.Println("  go run eterbit.go mine [-blocks <num>] [-address <addr>]")
-	fmt.Println("  go run eterbit.go mining <target_address>")
-	fmt.Println("  go run eterbit.go explorer")
-	fmt.Println("  go run eterbit.go peers")
-	fmt.Println("  go run eterbit.go fees")
-	fmt.Println("  go run eterbit.go uptime")
-	fmt.Println("  go run eterbit.go getnettotals")
-	fmt.Println("  go run eterbit.go blocksize")
-	fmt.Println("  go run eterbit.go getblockhash <index>")
-	fmt.Println("  go run eterbit.go getblock <hash>")
-	fmt.Println("  go run eterbit.go getblockcount (RPC)")
-	fmt.Println("  go run eterbit.go getinfo (RPC)")
-	fmt.Println("  go run eterbit.go getconnectioncount (RPC)")
+	fmt.Println("  ./eterbit create [-label <account_label>]")
+	fmt.Println("  ./eterbit balance")
+	fmt.Println("  ./eterbit supply")
+	fmt.Println("  ./eterbit send -to <addr> -amount <val> [-fee <val>] [-from <sender_addr>]")
+	fmt.Println("  ./eterbit node [--port :port] [--connect host:port]")
+	fmt.Println("  ./eterbit addnode <host:port>")
+	fmt.Println("  ./eterbit mine [-blocks <num>] [-address <addr>]")
+	fmt.Println("  ./eterbit mining <target_address>")
+	fmt.Println("  ./eterbit explorer")
+	fmt.Println("  ./eterbit peers")
+	fmt.Println("  ./eterbit fees")
+	fmt.Println("  ./eterbit uptime")
+	fmt.Println("  ./eterbit getnettotals")
+	fmt.Println("  ./eterbit blocksize")
+	fmt.Println("  ./eterbit getblockhash <index>")
+	fmt.Println("  ./eterbit getblock <hash>")
+	fmt.Println("  ./eterbit getblockcount (RPC)")
+	fmt.Println("  ./eterbit getinfo (RPC)")
+	fmt.Println("  ./eterbit getconnectioncount (RPC)")
 	fmt.Println("================================================================================")
 }
