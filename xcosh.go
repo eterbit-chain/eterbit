@@ -165,7 +165,7 @@ func printUsage() {
 	fmt.Println("  ./xcosh create [-label <account_label>]")
 	fmt.Println("  ./xcosh balance")
 	fmt.Println("  ./xcosh supply")
-	fmt.Println("  ./xcosh send -to <addr> -amount <val> [-fee <val>] [-from <sender_addr>]")
+	fmt.Println("  ./xcosh send -from <addr> -amount <val> [-fee <val>] [-to <sender_addr>]")
 	fmt.Println("  ./xcosh node [--port :port] [--connect host:port]")
 	fmt.Println("  ./xcosh addnode <host:port>")
 	fmt.Println("  ./xcosh mine [-blocks <num>] [-address <addr>]")
