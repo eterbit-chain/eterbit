@@ -21,8 +21,11 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
 
 	"eterbit/internal"
+	"eterbit/node"
+	"eterbit/storage/wallet"
 )
 
 // RPCRequest represents the incoming JSON-RPC request structure.
@@ -90,18 +93,54 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 			response.Result = 1
 
 		case "getinfo":
-			height := 0
+			blocks := 0
 			if v.IsValid() && v.Kind() == reflect.Struct {
 				chainField := v.FieldByName("Chain")
-				if chainField.IsValid() && chainField.Len() > 0 {
-					height = chainField.Len() - 1
+				if chainField.IsValid() {
+					blocks = chainField.Len()
+				}
+			}
+
+			// Hitung total balance dari wallet lokal jika tersedia
+			totalBalance := 0.0
+			walletPath := filepathJoinWallet(cfg) // atau ambil dari path default GetDataDir
+			if wf, err := wallet.LoadWalletCustom(walletPath); err == nil && wf != nil {
+				if v.IsValid() && v.Kind() == reflect.Struct {
+					stateField := v.FieldByName("State")
+					if stateField.IsValid() && stateField.Kind() == reflect.Map {
+						for _, acc := range wf.Accounts {
+							if val := stateField.MapIndex(reflect.ValueOf(acc.Address)); val.IsValid() {
+								// Asumsikan struct state memiliki field Balance (uint64)
+								accStruct := val.Elem()
+								if accStruct.IsValid() && accStruct.Kind() == reflect.Struct {
+									balField := accStruct.FieldByName("Balance")
+									if balField.IsValid() {
+										rawBal := balField.Uint()
+										totalBalance += node.ToDecimal(rawBal)
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 
 			response.Result = map[string]interface{}{
-				"blocks":      height,
-				"connections": 1,
-				"version":     10000,
+				"version":         1010000,
+				"protocolversion": 70015,
+				"walletversion":   130000,
+				"balance":         totalBalance,
+				"blocks":          blocks,
+				"timeoffset":      0,
+				"connections":     1,
+				"proxy":           "",
+				"difficulty":      0.0002441371325370145,
+				"testnet":         false,
+				"keypoololdest":   time.Now().Unix() - 86400,
+				"keypoolsize":     100,
+				"paytxfee":        0.00001000,
+				"relayfee":        0.00000010,
+				"errors":          "",
 			}
 
 		default:
@@ -121,4 +160,13 @@ func StartRPCServer(rpcPort string, ledger interface{}, cfg *internal.Config) {
 			fmt.Printf("[RPC] Server error: %v\n", err)
 		}
 	}()
+}
+
+// Helper kecil untuk melacak path wallet.dat
+func filepathJoinWallet(cfg *internal.Config) string {
+	home, err := internal.GetHomeDir() // atau gunakan os.UserHomeDir()
+	if err != nil {
+		return "wallet.dat"
+	}
+	return home + "/.eterbit/wallet.dat"
 }
