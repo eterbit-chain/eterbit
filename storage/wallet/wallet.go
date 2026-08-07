@@ -43,7 +43,9 @@ type WalletFile struct {
 func getDataDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "eterbit_data" // Fallback to local if home dir is inaccessible
+		dir := filepath.Join(".", ".eterbit")
+		os.MkdirAll(dir, 0755)
+		return dir
 	}
 	dir := filepath.Join(homeDir, ".eterbit")
 	os.MkdirAll(dir, 0755)
@@ -168,7 +170,7 @@ func GenerateNewAccount(filePath string) (string, error) {
 	pubHex := hex.EncodeToString(pubBytes)
 	privHex := hex.EncodeToString(privBytes)
 
-	newAcc := Account{
+    newAcc := Account{
 		Address:    addr,
 		PublicKey:  pubHex,
 		PrivateKey: privHex,
