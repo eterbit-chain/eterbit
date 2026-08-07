@@ -26,4 +26,12 @@ To see all the feature functions, you can type the command below:
 
   ./eterbit --help
 
+To get a wallet address or create one, you can type the following command:
+
+  ./eterbit create [-label <account_label>]
+
+To support the network by running a mining node, execute the manual mining command or keep the node running:
+
+  ./eterbit mining <target_address>
+
 Your computer will be solving computational problems using SHA-3 Keccak-256 and post-quantum Dilithium Mode 3 signatures that are used to lock in blocks of transactions. As a reward for supporting the network, you receive newly minted coins when you successfully generate a block.
