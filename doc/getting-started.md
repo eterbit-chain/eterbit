@@ -20,3 +20,18 @@ Before interacting with the ledger or mining coins, create your local cryptograp
 
 ```bash
 ./eterbit create -label "MainNode"
+```
+
+## 3. Running a Node & Mining
+Start a local network node instance or test block mining manually:
+
+```bash
+# Check initial account balance
+./eterbit balance
+
+# Start the P2P network node instance
+./eterbit node
+
+# Run manual proof-of-work mining targeting your address
+./eterbit mining <your_address>
+```
